@@ -39,7 +39,7 @@ These are not optional. They are enforced by the file layout and by INSTRUCTIONS
 
 | Component | Allowed | Banned |
 |---|---|---|
-| Database | MySQL `8.0.36` | Postgres, SQLite, MariaDB, DuckDB for results |
+| Database | MySQL `>= 8.0.36, < 8.1` (tested on 8.0.36; dev runs 8.0.39) | Postgres, SQLite, MariaDB, DuckDB for results |
 | DB driver | `PyMySQL >= 1.1, < 1.2` | mysql-connector-python, asyncmy, aiomysql |
 | DB access | `SQLAlchemy >= 2.0.30, < 2.1` — **Core only** (`Table`, `select`, `insert`, `update`, `text`) | SQLAlchemy ORM (declarative_base, Session.query, mapped_column), Django ORM, Peewee, Tortoise |
 | Migrations | `Alembic >= 1.13, < 1.14` | hand-written DDL outside Alembic |
