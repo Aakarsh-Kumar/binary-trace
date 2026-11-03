@@ -24,25 +24,25 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P0 |
 | Last completed milestone | — |
 | Active branch | `main` |
-| Last green commit | — |
+| Last green commit | 8a341f2 |
 | Unit test count | 0 |
 | Integration test count | 0 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: draft` | 0 |
 | Known failing tests | 0 |
-| Open roadblocks | 2 (RB-001, RB-002) |
+| Open roadblocks | 0 |
 | Frozen invariants intact | yes |
 
 **Environment (recorded at P0 preflight 2026-11-04):**
 
 | Component | Required | Actual | Status |
 |---|---|---|---|
-| Python | 3.11.x | 3.12.5 (system); uv-managed 3.11 pending | RB-002 |
-| uv | 0.5.x | not installed at preflight | RB-003 |
-| MySQL | 8.0.x (D-011) | 8.0.39 | RB-001 closed via D-011; PATH pending |
+| Python | 3.11.x | 3.11.18 (uv-managed) | PASS |
+| uv | 0.5.x | 0.13.7 (on PATH) | PASS |
+| MySQL | 8.0.x (D-011) | 8.0.39 (on PATH) | PASS |
 | Ollama | ≥ 0.3 | 0.40.13 | PASS |
 | qwen3:4b | present | present (`359d7dd4bcda`) | PASS |
-| Git | clean tree | no commits yet | initial commit pending |
+| Git | clean tree | main | PASS |
 
 **Frozen invariant checklist (verified each commit):**
 - [ ] Evidence verifier thresholds unchanged (`prefix_len=40`, `fuzzy_threshold=0.92`)
@@ -76,53 +76,7 @@ Template:
 
 ## 3. Active Roadblocks
 
-```
-### RB-<NNN>: <short title>
-- Opened: [YYYY-MM-DD]
-- Opened by: `agent:<task-id>`
-- Phase / user story: P<n> / US-<id>
-- What is blocked: <one sentence>
-- What the agent wanted to invent: <schema / dependency / endpoint / directory / tag>
-- Alternatives considered:
-  1. <alternative> — rejected because <reason>
-  2. <alternative> — rejected because <reason>
-- Amendment required: <PRD.md §x.y | ARCHITECTURE.md §x.y>
-- Status: open
-```
-
-### RB-001: MySQL patch version differs from pin
-- Opened: 2026-11-04
-- Opened by: `agent:preflight`
-- Phase / user story: P0 / setup
-- What is blocked: nothing (resolution is D-011)
-- What the agent wanted to invent: nothing
-- Alternatives considered: downgrade to 8.0.36 (rejected — no schema impact), amend pin (chosen)
-- Amendment required: ARCHITECTURE.md §2.2
-- Status: **closed via D-011**
-
-### RB-002: Python 3.11.x not installed
-- Opened: 2026-11-04
-- Opened by: `agent:preflight`
-- Phase / user story: P0 / setup
-- What is blocked: P0 task 1 (repo skeleton) cannot create `.python-version` or venv
-- What the agent wanted to invent: use Python 3.12 (rejected — ARCHITECTURE.md §2.1 bans 3.12)
-- Alternatives considered:
-  1. Amend pin to 3.12 — rejected; downgrades reproducibility, 3.12 has wheel gaps for pinned deps
-  2. `uv python install 3.11` — chosen; preserves the pin, no amendment needed
-- Amendment required: none
-- Status: open — resolution: agent runs `uv python install 3.11` after uv is installed (RB-003)
-
-### RB-003: uv not on PATH
-- Opened: 2026-11-04
-- Opened by: `agent:preflight`
-- Phase / user story: P0 / setup
-- What is blocked: all of P0
-- What the agent wanted to invent: pip (rejected — ARCHITECTURE.md §2.1 bans pip)
-- Alternatives considered:
-  1. pip install uv — allowed as bootstrap; uv governs thereafter
-  2. official installer — `irm https://astral.sh/uv/install.ps1 | iex`
-- Amendment required: none
-- Status: open — human to install
+(No active roadblocks.)
 
 ---
 
@@ -136,7 +90,23 @@ Template:
 - Follow-up test added: <test file>::<test name>
 ```
 
-(RB-001 resolved by D-011 on 2026-11-04; awaiting ARCHITECTURE.md amendment commit.)
+### RB-001 (resolved 2026-11-04)
+- Resolution: Widened MySQL pin to >= 8.0.36, < 8.1 via D-011.
+- Resolved by: human:arch / agent
+- Amendment commit: 8a341f2
+- Follow-up test added: none (driver handles patch compatibility)
+
+### RB-002 (resolved 2026-11-04)
+- Resolution: Installed Python 3.11.18 via `uv python install 3.11` and created venv.
+- Resolved by: agent
+- Amendment commit: pending (commit for chore: pin Python 3.11.x via uv)
+- Follow-up test added: none
+
+### RB-003 (resolved 2026-11-04)
+- Resolution: uv 0.13.7 present on User PATH.
+- Resolved by: human:arch / agent
+- Amendment commit: none
+- Follow-up test added: none
 
 ---
 

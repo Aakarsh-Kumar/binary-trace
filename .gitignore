@@ -1,0 +1,26 @@
+# Environment and local configs
+.env.local
+.env
+.venv/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Data and logs (PRD.md §6.5, ARCHITECTURE.md §3)
+data/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
