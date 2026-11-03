@@ -99,7 +99,7 @@ Template:
 ### RB-002 (resolved 2026-11-04)
 - Resolution: Installed Python 3.11.18 via `uv python install 3.11` and created venv.
 - Resolved by: agent
-- Amendment commit: pending (commit for chore: pin Python 3.11.x via uv)
+- Amendment commit: c7beff1
 - Follow-up test added: none
 
 ### RB-003 (resolved 2026-11-04)
