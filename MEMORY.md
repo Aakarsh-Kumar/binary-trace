@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P0 complete (awaiting P1 sign-off) |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | pending P0 commit |
+| Last green commit | aaf052c |
 | Unit test count | 14 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
@@ -60,7 +60,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-04] src/compliance_review/ingestion/ — US-01, US-02, US-03, US-04, US-05
 - Verified by: `agent:p0`
-- Commit: pending P0 commit
+- Commit: aaf052c
 - Tests: `tests/integration/test_ingest_deterministic.py`
 - Behaviour: Ingests prose (md, pdf, docx), code repos, and mixed submissions; rejects duplicates by external_id; computes SHA256.
 - Depends on: `src/compliance_review/ingestion/`, `src/compliance_review/db/repository.py`, MySQL `submissions` table.
@@ -68,7 +68,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-04] src/compliance_review/skills/ — US-06, US-07
 - Verified by: `agent:p0`
-- Commit: pending P0 commit
+- Commit: aaf052c
 - Tests: `tests/unit/test_schema_validation.py`, CLI `compliance-review skills validate --root skills/`
 - Behaviour: Validates and loads YAML frontmatter and Markdown bodies for 4 seed skills conforming to SkillDefinition.
 - Depends on: `src/compliance_review/skills/schema.py`, `skills/`.
@@ -76,7 +76,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-04] src/compliance_review/retrieval/capability_gate.py — US-13
 - Verified by: `agent:p0`
-- Commit: pending P0 commit
+- Commit: aaf052c
 - Tests: `tests/unit/test_gate_purity.py`
 - Behaviour: Deterministically routes submission type and surface features to required capabilities without model or vector calls.
 - Depends on: pure python, standard library only.
@@ -84,7 +84,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-04] src/compliance_review/evidence/verifier.py — US-23
 - Verified by: `agent:p0`
-- Commit: pending P0 commit
+- Commit: aaf052c
 - Tests: `tests/unit/test_verifier_invariant.py`
 - Behaviour: Normalizes spans with NFKC and whitespace collapsing; verifies exact prefix and fuzzy matches against frozen thresholds (40, 0.92).
 - Depends on: standard library `unicodedata`, `difflib`.
@@ -92,7 +92,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-04] src/compliance_review/harness/orchestrator.py — D-009
 - Verified by: `agent:p0`
-- Commit: pending P0 commit
+- Commit: aaf052c
 - Tests: `tests/integration/test_ingest_deterministic.py`, CLI `compliance-review review --deterministic-only`
 - Behaviour: Executes deterministic checks on enabled capabilities and outputs structured trace table.
 - Depends on: `src/compliance_review/checks/deterministic/`, `src/compliance_review/db/repository.py`.
