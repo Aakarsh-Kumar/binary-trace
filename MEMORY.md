@@ -25,12 +25,12 @@ This file is the project's persistent memory. It is the first file an agent read
 | Last completed milestone | — |
 | Active branch | `main` |
 | Last green commit | 8a341f2 |
-| Unit test count | 0 |
+| Unit test count | 2 |
 | Integration test count | 0 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: draft` | 0 |
 | Known failing tests | 0 |
-| Open roadblocks | 0 |
+| Open roadblocks | 1 (RB-004) |
 | Frozen invariants intact | yes |
 
 **Environment (recorded at P0 preflight 2026-11-04):**
@@ -76,7 +76,17 @@ Template:
 
 ## 3. Active Roadblocks
 
-(No active roadblocks.)
+### RB-004: app_user lacks DDL privileges for Alembic migrations
+- Opened: 2026-11-04
+- Opened by: `agent:p0`
+- Phase / user story: P0 / setup (0001_initial migration)
+- What is blocked: `alembic upgrade head` fails with `(1142, "CREATE command denied to user 'app_user'@'localhost' for table 'alembic_version'")`
+- What the agent wanted to invent: root access / privilege bypass (rejected per guidelines)
+- Alternatives considered:
+  1. Bypass access control or probe host service config — rejected per security guidelines
+  2. Request DBA grant for DDL privileges on target database (`GRANT ALL PRIVILEGES ON compliance_review.* TO 'app_user'@'%'; FLUSH PRIVILEGES;`) — chosen
+- Amendment required: none (database user configuration)
+- Status: open — human to execute grant in MySQL
 
 ---
 
@@ -202,6 +212,14 @@ Template:
 - Decision: supported range is `MySQL >= 8.0.36, < 8.1`. Tested on 8.0.36 (reference); dev runs 8.0.39. No schema or grant differences between these patch releases.
 - Alternatives rejected: downgrade to 8.0.36 — no benefit, risk to dev environment.
 - Documents amended: PRD.md §6.5, ARCHITECTURE.md §2.2, §4
+- Reversible: yes
+
+### D-012: Ignore UP017 in ruff to uphold ARCHITECTURE.md §2.7
+- Date: 2026-11-04 · Decided by: agent
+- Context: Ruff rule UP017 flags `timezone.utc` to recommend `datetime.UTC`. However, ARCHITECTURE.md §2.7 strictly specifies `stdlib datetime with timezone.utc everywhere`.
+- Decision: add `UP017` to ruff `ignore` list in `pyproject.toml`.
+- Alternatives rejected: use `datetime.UTC` (violates frozen requirement in ARCHITECTURE.md §2.7).
+- Documents amended: none (configuration only)
 - Reversible: yes
 
 ---
