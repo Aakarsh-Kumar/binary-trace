@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P0 |
 | Last completed milestone | — |
 | Active branch | `main` |
-| Last green commit | 8a341f2 |
+| Last green commit | 7e8ad9b |
 | Unit test count | 2 |
 | Integration test count | 0 |
 | Skills at `eval_status: active` | 0 |
