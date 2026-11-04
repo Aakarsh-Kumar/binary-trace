@@ -5,3 +5,4 @@
 REVOKE UPDATE, DELETE ON compliance_review.audit_log FROM 'app_user'@'%';
 GRANT INSERT, SELECT ON compliance_review.audit_log TO 'app_user'@'%';
 FLUSH PRIVILEGES;
+

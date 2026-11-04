@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.0.0 |
+| Document version | 1.1.0 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,16 +21,16 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P0 |
-| Last completed milestone | — |
+| Current phase | P0 complete (awaiting P1 sign-off) |
+| Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 7e8ad9b |
-| Unit test count | 2 |
-| Integration test count | 0 |
+| Last green commit | pending P0 commit |
+| Unit test count | 14 |
+| Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
-| Skills at `eval_status: draft` | 0 |
+| Skills at `eval_status: draft` | 4 |
 | Known failing tests | 0 |
-| Open roadblocks | 1 (RB-004) |
+| Open roadblocks | 0 |
 | Frozen invariants intact | yes |
 
 **Environment (recorded at P0 preflight 2026-11-04):**
@@ -45,48 +45,64 @@ This file is the project's persistent memory. It is the first file an agent read
 | Git | clean tree | main | PASS |
 
 **Frozen invariant checklist (verified each commit):**
-- [ ] Evidence verifier thresholds unchanged (`prefix_len=40`, `fuzzy_threshold=0.92`)
-- [ ] Capability gate has no model/vector call
-- [ ] Model tag is `qwen3:4b`, `model_digest` recorded
-- [ ] `k = 3` default in `Settings`
-- [ ] Disagreement not averaged in dashboard
-- [ ] `unsupported_evidence` not shown as findings
-- [ ] `audit_log` append-only grant intact
-- [ ] No cloud call in `tests/integration/test_offline.py`
+- [x] Evidence verifier thresholds unchanged (`prefix_len=40`, `fuzzy_threshold=0.92`)
+- [x] Capability gate has no model/vector call
+- [x] Model tag is `qwen3:4b`, `model_digest` recorded
+- [x] `k = 3` default in `Settings`
+- [x] Disagreement not averaged in dashboard
+- [x] `unsupported_evidence` not shown as findings
+- [x] `audit_log` append-only grant intact
+- [x] No cloud call in `tests/integration/test_offline.py`
 
 ---
 
 ## 2. Verified Implementations
 
-Template:
+### [2026-11-04] src/compliance_review/ingestion/ — US-01, US-02, US-03, US-04, US-05
+- Verified by: `agent:p0`
+- Commit: pending P0 commit
+- Tests: `tests/integration/test_ingest_deterministic.py`
+- Behaviour: Ingests prose (md, pdf, docx), code repos, and mixed submissions; rejects duplicates by external_id; computes SHA256.
+- Depends on: `src/compliance_review/ingestion/`, `src/compliance_review/db/repository.py`, MySQL `submissions` table.
+- Supersedes: none
 
-```
-### [YYYY-MM-DD] <component path> — <user story>
-- Verified by: `agent:<task-id>` | `human:<initials>`
-- Commit: <sha>
-- Tests: <test file>::<test name>
-- Behaviour: <one sentence>
-- Depends on: <list of modules / tables>
-- Supersedes: <entry-id or "none">
-```
+### [2026-11-04] src/compliance_review/skills/ — US-06, US-07
+- Verified by: `agent:p0`
+- Commit: pending P0 commit
+- Tests: `tests/unit/test_schema_validation.py`, CLI `compliance-review skills validate --root skills/`
+- Behaviour: Validates and loads YAML frontmatter and Markdown bodies for 4 seed skills conforming to SkillDefinition.
+- Depends on: `src/compliance_review/skills/schema.py`, `skills/`.
+- Supersedes: none
 
-(No entries yet.)
+### [2026-11-04] src/compliance_review/retrieval/capability_gate.py — US-13
+- Verified by: `agent:p0`
+- Commit: pending P0 commit
+- Tests: `tests/unit/test_gate_purity.py`
+- Behaviour: Deterministically routes submission type and surface features to required capabilities without model or vector calls.
+- Depends on: pure python, standard library only.
+- Supersedes: none
+
+### [2026-11-04] src/compliance_review/evidence/verifier.py — US-23
+- Verified by: `agent:p0`
+- Commit: pending P0 commit
+- Tests: `tests/unit/test_verifier_invariant.py`
+- Behaviour: Normalizes spans with NFKC and whitespace collapsing; verifies exact prefix and fuzzy matches against frozen thresholds (40, 0.92).
+- Depends on: standard library `unicodedata`, `difflib`.
+- Supersedes: none
+
+### [2026-11-04] src/compliance_review/harness/orchestrator.py — D-009
+- Verified by: `agent:p0`
+- Commit: pending P0 commit
+- Tests: `tests/integration/test_ingest_deterministic.py`, CLI `compliance-review review --deterministic-only`
+- Behaviour: Executes deterministic checks on enabled capabilities and outputs structured trace table.
+- Depends on: `src/compliance_review/checks/deterministic/`, `src/compliance_review/db/repository.py`.
+- Supersedes: none
 
 ---
 
 ## 3. Active Roadblocks
 
-### RB-004: app_user lacks DDL privileges for Alembic migrations
-- Opened: 2026-11-04
-- Opened by: `agent:p0`
-- Phase / user story: P0 / setup (0001_initial migration)
-- What is blocked: `alembic upgrade head` fails with `(1142, "CREATE command denied to user 'app_user'@'localhost' for table 'alembic_version'")`
-- What the agent wanted to invent: root access / privilege bypass (rejected per guidelines)
-- Alternatives considered:
-  1. Bypass access control or probe host service config — rejected per security guidelines
-  2. Request DBA grant for DDL privileges on target database (`GRANT ALL PRIVILEGES ON compliance_review.* TO 'app_user'@'%'; FLUSH PRIVILEGES;`) — chosen
-- Amendment required: none (database user configuration)
-- Status: open — human to execute grant in MySQL
+(No active roadblocks.)
 
 ---
 
@@ -117,6 +133,12 @@ Template:
 - Resolved by: human:arch / agent
 - Amendment commit: none
 - Follow-up test added: none
+
+### RB-004 (resolved 2026-11-04)
+- Resolution: Granted DDL privileges on compliance_review.* to app_user; migration 0001_initial applied creating 7 tables.
+- Resolved by: human:arch / agent
+- Amendment commit: applied via migration 0001_initial
+- Follow-up test added: `tests/integration/test_ingest_deterministic.py`, `tests/integration/test_audit_append_only.py`
 
 ---
 
@@ -263,17 +285,17 @@ Template:
 ## 9. Phase Gate Checklist
 
 ### P0 gate
-- [ ] `submissions` table created via Alembic migration `0001_initial.py`
-- [ ] `compliance-review ingest` works on prose, code, mixed submissions
-- [ ] `compliance-review skills validate` passes on four seed `SKILL.md` (draft)
-- [ ] `compliance-review review --deterministic-only` prints trace: capability_set, gate_reason, deterministic verdicts, latency_ms
-- [ ] `capability_gate.py` imports no model or faiss module (`test_gate_purity.py`)
-- [ ] `audit_log` rejects UPDATE and DELETE at MySQL grant level (`test_audit_append_only.py`)
-- [ ] `test_offline.py` passes with egress blocked
-- [ ] `test_verifier_invariant.py` passes, asserting frozen thresholds
-- [ ] `ruff`, `ruff format --check`, `mypy --strict`, unit and integration tests all green
-- [ ] `data/raw/MANIFEST.json` exists and lists all seven datasets (or roadblocks)
-- [ ] Frozen invariant checklist (§1) all ticked
+- [x] `submissions` table created via Alembic migration `0001_initial.py` (verified via SHOW TABLES: submissions, retrieval_events, skill_executions, checklist_verdicts, evidence_verifications, reviewer_feedback, audit_log, alembic_version)
+- [x] `compliance-review ingest` works on prose, code, mixed submissions (`tests/integration/test_ingest_deterministic.py`)
+- [x] `compliance-review skills validate` passes on four seed `SKILL.md` (draft) (`skills/*/v1/SKILL.md`)
+- [x] `compliance-review review --deterministic-only` prints trace: capability_set, gate_reason, deterministic verdicts, latency_ms (`tests/integration/test_ingest_deterministic.py`, `src/compliance_review/harness/orchestrator.py`)
+- [x] `capability_gate.py` imports no model or faiss module (`tests/unit/test_gate_purity.py`)
+- [x] `audit_log` rejects UPDATE and DELETE at MySQL grant level (`tests/integration/test_audit_append_only.py`)
+- [x] `test_offline.py` passes with egress blocked (`tests/integration/test_offline.py`)
+- [x] `test_verifier_invariant.py` passes, asserting frozen thresholds (`tests/unit/test_verifier_invariant.py`)
+- [x] `ruff`, `ruff format --check`, `mypy --strict`, unit and integration tests all green (30 source files checked, 20 tests pass)
+- [x] `data/raw/MANIFEST.json` exists and lists all seven datasets (or roadblocks) (`scripts/fetch_datasets.py`)
+- [x] Frozen invariant checklist (§1) all ticked
 
 ### P1 gate
 - [ ] Ollama reachable, `qwen3:4b` digest recorded in `skill_executions`

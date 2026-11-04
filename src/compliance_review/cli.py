@@ -1,8 +1,175 @@
-"""CLI entrypoint for compliance-review."""
+"""CLI entrypoint for compliance-review conforming to ARCHITECTURE.md §9."""
 
+import sys
+from pathlib import Path
+from typing import Any
+
+import click.core
 import typer
+import typer.core
+
+from compliance_review.errors import DuplicateSubmissionError, IngestError, SkillValidationError
+from compliance_review.skills.loader import load_all_skills
+
+# Compatibility shim: Click 8.5+ breaking changes with Typer 0.12:
+# 1. Parameter.make_metavar() requires ctx argument.
+# 2. Click 8.5 uses UNSET sentinel for flag_value; Typer 0.12 passes flag_value=None causing
+#    all options to be inferred as boolean flags.
+_orig_make_metavar = click.core.Parameter.make_metavar
+
+
+def _compat_make_metavar(self: Any, ctx: Any = None) -> str:
+    if ctx is None:
+        ctx = click.get_current_context(silent=True)
+    return (
+        str(_orig_make_metavar(self, ctx))
+        if ctx is not None
+        else (self.type.get_metavar(self) or "")
+    )
+
+
+click.core.Parameter.make_metavar = _compat_make_metavar  # type: ignore[method-assign]
+
+_orig_typer_opt_init = typer.core.TyperOption.__init__
+
+
+def _compat_typer_opt_init(self: Any, *args: Any, **kwargs: Any) -> None:
+    unset_val = getattr(click.core, "UNSET", None)
+    if kwargs.get("is_flag") is True:
+        if kwargs.get("flag_value") is None or kwargs.get("flag_value") is unset_val:
+            kwargs["flag_value"] = True
+    elif kwargs.get("is_flag") is False or kwargs.get("is_flag") is None:
+        if kwargs.get("flag_value") is None:
+            kwargs["flag_value"] = unset_val
+            kwargs["is_flag"] = False
+    _orig_typer_opt_init(self, *args, **kwargs)
+
+
+typer.core.TyperOption.__init__ = _compat_typer_opt_init  # type: ignore[method-assign]
 
 app = typer.Typer(help="Grounded, local-first skill-retrieved compliance review.")
+skills_app = typer.Typer(help="Manage and validate skills library.")
+audit_app = typer.Typer(help="Audit log commands.")
+index_app = typer.Typer(help="Vector index operations.")
+
+app.add_typer(skills_app, name="skills")
+app.add_typer(audit_app, name="audit")
+app.add_typer(index_app, name="index")
+
+
+@skills_app.command("validate")
+def validate_skills(
+    root: Path = typer.Option(Path("skills"), "--root", help="Root skills directory."),
+) -> None:
+    """Validate all SKILL.md files under root directory (US-07)."""
+    try:
+        loaded = load_all_skills(root)
+        typer.echo(f"Validating {len(loaded)} skills under {root}...")
+        for (capability, version), skill in loaded.items():
+            typer.echo(
+                f"  [PASS] {capability}/{version} ({skill.eval_status}) - "
+                f"{len(skill.checklist)} checks"
+            )
+        typer.echo(f"All {len(loaded)} skills validated successfully.")
+    except SkillValidationError as exc:
+        typer.echo(f"Validation failed: {exc}", err=True)
+        sys.exit(1)
+
+
+@skills_app.command("promote")
+def promote_skill(
+    capability: str = typer.Option(..., help="Capability name"),
+    version: str = typer.Option(..., help="Version to promote"),
+) -> None:
+    """Promote a skill to active after regression suite passes (US-09)."""
+    typer.echo("skills promote is not implemented until P5", err=True)
+    sys.exit(3)
+
+
+@skills_app.command("demote")
+def demote_skill(
+    capability: str = typer.Option(..., help="Capability name"),
+    version: str = typer.Option(..., help="Version to demote"),
+) -> None:
+    """Demote a skill version to deprecated (US-10)."""
+    typer.echo("skills demote is not implemented until P5", err=True)
+    sys.exit(3)
+
+
+@app.command("ingest")
+def ingest_submission(
+    source: Path = typer.Option(..., help="Source file or directory path"),
+    type: str = typer.Option(..., "--type", help="prose | code | mixed"),
+    external_id: str | None = typer.Option(None, help="External submission identifier"),
+) -> None:
+    """Ingest a student submission (US-01..US-05)."""
+    from compliance_review.ingestion.orchestrator import ingest_source
+
+    try:
+        sub_id, sha256 = ingest_source(source, type, external_id)
+        typer.echo(f"Ingested submission id={sub_id} sha256={sha256} source={source}")
+    except DuplicateSubmissionError as exc:
+        typer.echo(f"Duplicate submission error: {exc}", err=True)
+        sys.exit(1)
+    except IngestError as exc:
+        typer.echo(f"Ingestion error: {exc}", err=True)
+        sys.exit(1)
+    except Exception as exc:
+        typer.echo(f"Runtime error: {exc}", err=True)
+        sys.exit(2)
+
+
+@app.command("review")
+def review_submission(
+    submission_id: int = typer.Option(..., help="Submission ID to review"),
+    k: int = typer.Option(3, help="Number of evaluation runs"),
+    deterministic_only: bool = typer.Option(
+        False, "--deterministic-only", help="Run gate + deterministic checks only (D-009)"
+    ),
+) -> None:
+    """Review an ingested submission."""
+    if not deterministic_only:
+        typer.echo(
+            "Model-based review not implemented until P1; use --deterministic-only", err=True
+        )
+        sys.exit(3)
+
+    from compliance_review.harness.orchestrator import run_deterministic_review
+
+    try:
+        trace = run_deterministic_review(submission_id)
+        typer.echo(trace)
+    except Exception as exc:
+        typer.echo(f"Review error: {exc}", err=True)
+        sys.exit(2)
+
+
+@app.command("metrics")
+def compute_metrics(
+    labels: Path = typer.Option(..., help="Path to gold labels CSV"),
+    out: Path = typer.Option(..., help="Path to write metrics JSON"),
+) -> None:
+    """Compute benchmark metrics against gold labels (US-35)."""
+    typer.echo("metrics is not implemented until P2", err=True)
+    sys.exit(3)
+
+
+@audit_app.command("export")
+def export_audit(
+    since: str = typer.Option(..., help="Date YYYY-MM-DD"),
+    out: Path = typer.Option(..., help="Output JSON path"),
+) -> None:
+    """Export audit log since given date (US-36)."""
+    typer.echo("audit export is not implemented until P5", err=True)
+    sys.exit(3)
+
+
+@index_app.command("rebuild")
+def rebuild_index() -> None:
+    """Rebuild the FAISS skills vector index."""
+    typer.echo("index rebuild is not implemented until P1", err=True)
+    sys.exit(3)
+
 
 if __name__ == "__main__":
     app()

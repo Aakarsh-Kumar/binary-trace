@@ -268,3 +268,4 @@ def downgrade() -> None:
     op.drop_table("skill_executions")
     op.drop_table("retrieval_events")
     op.drop_table("submissions")
+
