@@ -14,8 +14,13 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# Data and logs (PRD.md §6.5, ARCHITECTURE.md §3)
-data/
+# Data and logs (PRD.md §6.5, ARCHITECTURE.md §3, D-013)
+data/*
+!data/raw/
+data/raw/*
+!data/raw/MANIFEST.json
+!data/pilots/
+data/pilots/PILOT_REPORT.md
 
 # IDE / OS
 .idea/
