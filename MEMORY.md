@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 290a88c |
-| Unit test count | 39 |
+| Last green commit | pending |
+| Unit test count | 43 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -149,10 +149,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] src/compliance_review/evidence/verifier.py — US-24, US-25, US-26
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: bdf9bce
 - Tests: `tests/unit/test_verifier_invariant.py`, `tests/unit/test_evidence_downgrade.py`
 - Behaviour: Validates evidence location grammar and resolves source spans; verifies exact substrings, 40-character prefixes, and difflib SequenceMatcher >= 0.92; returns EvidenceResult with verified boolean and method.
 - Depends on: `src/compliance_review/evidence/verifier.py`.
+- Supersedes: none
+
+### [2026-11-05] src/compliance_review/harness/ — US-19, US-24, US-25, US-28
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_k_agreement.py`
+- Behaviour: Implements k-run harness with per-check verdict agreement and evidence Jaccard metrics; connects orchestrator pipeline (gate -> FAISS selector -> deterministic & model checks -> evidence verification -> downgrade unsupported flags to unsupported_evidence -> severity cap -> DB persistence); wires CLI `compliance-review review`.
+- Depends on: `src/compliance_review/harness/`, `src/compliance_review/db/repository.py`, `src/compliance_review/evidence/verifier.py`.
 - Supersedes: none
 
 ---

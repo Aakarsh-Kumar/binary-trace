@@ -8,6 +8,7 @@ from compliance_review.db.engine import get_engine
 from compliance_review.db.tables import (
     audit_log,
     checklist_verdicts,
+    evidence_verifications,
     retrieval_events,
     skill_executions,
     submissions,
@@ -211,3 +212,165 @@ def record_deterministic_execution_and_verdicts(
             return execution_id
     except Exception as exc:
         raise DatabaseError(f"Failed to record execution and verdicts: {exc}") from exc
+
+
+def write_evidence_verification(
+    conn: Connection,
+    verdict_id: int,
+    verified: bool,
+    method: str,
+    located_at: str | None = None,
+    failure_reason: str | None = None,
+    actor: str = "agent:evidence_verifier",
+) -> int:
+    """Insert a row into evidence_verifications and record to audit_log (US-24, US-26)."""
+    stmt = evidence_verifications.insert().values(
+        verdict_id=verdict_id,
+        verified=verified,
+        method=method,
+        located_at=located_at,
+        failure_reason=failure_reason,
+    )
+    res = conn.execute(stmt)
+    pk = res.inserted_primary_key
+    ev_id = int(pk[0]) if pk is not None else 0
+
+    append_audit(
+        conn,
+        actor=actor,
+        action="verify_evidence",
+        table_name="evidence_verifications",
+        row_id=ev_id,
+        before_json=None,
+        after_json={
+            "id": ev_id,
+            "verdict_id": verdict_id,
+            "verified": verified,
+            "method": method,
+        },
+    )
+    return ev_id
+
+
+def apply_evidence_downgrade(
+    conn: Connection,
+    verdict_id: int,
+    actor: str = "agent:evidence_verifier",
+) -> None:
+    """Downgrade a checklist_verdicts row to 'unsupported_evidence' and audit (US-25, §7.2)."""
+    stmt = (
+        checklist_verdicts.update()
+        .where(checklist_verdicts.c.id == verdict_id)
+        .values(verdict="unsupported_evidence")
+    )
+    conn.execute(stmt)
+
+    append_audit(
+        conn,
+        actor=actor,
+        action="evidence_downgrade",
+        table_name="checklist_verdicts",
+        row_id=verdict_id,
+        before_json={"verdict": "flag"},
+        after_json={"verdict": "unsupported_evidence"},
+    )
+
+
+def record_skill_execution_run(
+    submission_id: int,
+    capability: str,
+    version: str,
+    run_index: int,
+    model_name: str,
+    model_digest: str,
+    prompt_sha256: str,
+    raw_output: str | None,
+    parsed_output: dict[str, Any] | None,
+    status: str,
+    latency_ms: int,
+    verdicts_data: list[dict[str, Any]],
+    actor: str = "agent:harness",
+) -> int:
+    """Record a skill execution run, its verdicts, and evidence verifications atomically."""
+    engine = get_engine()
+    try:
+        with engine.begin() as conn:
+            exec_stmt = skill_executions.insert().values(
+                submission_id=submission_id,
+                skill_capability=capability,
+                skill_version=version,
+                run_index=run_index,
+                model_name=model_name,
+                model_digest=model_digest,
+                prompt_sha256=prompt_sha256,
+                raw_output=raw_output,
+                parsed_output=parsed_output,
+                status=status,
+                latency_ms=latency_ms,
+            )
+            exec_res = conn.execute(exec_stmt)
+            exec_pk = exec_res.inserted_primary_key
+            execution_id = int(exec_pk[0]) if exec_pk is not None else 0
+
+            append_audit(
+                conn,
+                actor=actor,
+                action="create_skill_execution",
+                table_name="skill_executions",
+                row_id=execution_id,
+                before_json=None,
+                after_json={
+                    "id": execution_id,
+                    "submission_id": submission_id,
+                    "capability": capability,
+                    "run_index": run_index,
+                },
+            )
+
+            for vd in verdicts_data:
+                cv_stmt = checklist_verdicts.insert().values(
+                    execution_id=execution_id,
+                    check_id=vd["check_id"],
+                    verdict=vd["verdict"],
+                    severity=vd["severity"],
+                    evidence_text=vd.get("evidence_text"),
+                    evidence_location=vd.get("evidence_location"),
+                    confidence=vd.get("confidence", 1.0),
+                )
+                cv_res = conn.execute(cv_stmt)
+                cv_pk = cv_res.inserted_primary_key
+                cv_id = int(cv_pk[0]) if cv_pk is not None else 0
+
+                append_audit(
+                    conn,
+                    actor=actor,
+                    action="create_checklist_verdict",
+                    table_name="checklist_verdicts",
+                    row_id=cv_id,
+                    before_json=None,
+                    after_json={
+                        "id": cv_id,
+                        "execution_id": execution_id,
+                        "check_id": vd["check_id"],
+                    },
+                )
+
+                # If this verdict carries evidence verification result
+                ev_res = vd.get("verification_result")
+                if ev_res is not None:
+                    write_evidence_verification(
+                        conn=conn,
+                        verdict_id=cv_id,
+                        verified=ev_res.verified,
+                        method=ev_res.method,
+                        located_at=ev_res.located_at,
+                        failure_reason=ev_res.failure_reason,
+                        actor=actor,
+                    )
+                    # If verification failed on a flag verdict, apply downgrade
+                    if vd["verdict"] == "flag" and not ev_res.verified:
+                        apply_evidence_downgrade(conn=conn, verdict_id=cv_id, actor=actor)
+
+            return execution_id
+    except Exception as exc:
+        raise DatabaseError(f"Failed to record skill execution run: {exc}") from exc

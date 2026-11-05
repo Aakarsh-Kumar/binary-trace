@@ -157,16 +157,15 @@ def review_submission(
         )
         sys.exit(1)
 
-    if not deterministic_only:
-        typer.echo(
-            "Model-based review not implemented until P1; use --deterministic-only", err=True
-        )
-        sys.exit(3)
-
-    from compliance_review.harness.orchestrator import run_deterministic_review
+    from compliance_review.harness.orchestrator import run_review
 
     try:
-        trace = run_deterministic_review(submission_id)
+        trace = run_review(
+            submission_id=submission_id,
+            k=k,
+            deterministic_only=deterministic_only,
+            skill_status=skill_status,
+        )
         typer.echo(trace)
     except Exception as exc:
         typer.echo(f"Review error: {exc}", err=True)
