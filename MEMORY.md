@@ -24,10 +24,11 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 66804c8 |
+| Last green commit | f809e0a |
 | Unit test count | 18 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
+| Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
 | Known failing tests | 0 |
 | Open roadblocks | 0 |
@@ -100,10 +101,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] src/compliance_review/skills/loader.py, cli.py — US-08
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: f809e0a
 - Tests: `tests/unit/test_skill_status.py`
 - Behaviour: Provides set_skill_status to transition eval_status in SKILL.md; adds CLI command `skills set-status` and `--skill-status` filter to `review`.
 - Depends on: `src/compliance_review/skills/loader.py`, `src/compliance_review/cli.py`.
+- Supersedes: none
+
+### [2026-11-05] skills/ — US-06, US-07, US-08
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_schema_validation.py`, `compliance-review skills validate --root skills/`
+- Behaviour: Authored 4 v2 skills with 2 model items each and location grammar evidence requirements; set status to evaluating via `skills set-status`.
+- Depends on: `src/compliance_review/skills/schema.py`, `src/compliance_review/skills/loader.py`.
 - Supersedes: none
 
 ---
