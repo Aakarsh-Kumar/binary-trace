@@ -21,7 +21,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P0 complete (awaiting P1 sign-off) |
+| Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
 | Last green commit | aaf052c |
@@ -236,7 +236,35 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: PRD.md §6.5, ARCHITECTURE.md §2.2, §4
 - Reversible: yes
 
-### D-012: Ignore UP017 in ruff to uphold ARCHITECTURE.md §2.7
+### D-012: Add `--skill-status` review filter
+- Date: 2026-11-05 · Decided by: human:arch
+- Decision: Add `--skill-status {active|evaluating|draft|all}` to `compliance-review review` in ARCHITECTURE.md §9. Default `active`.
+- Context: Exists only to let P1 exercise model-based v2 skills while v1 stays the production path.
+- Documents amended: ARCHITECTURE.md §9
+- Reversible: yes
+
+### D-013: Add `data/pilots/` directory
+- Date: 2026-11-05 · Decided by: human:arch
+- Decision: Add `data/pilots/` to ARCHITECTURE.md §3 holding 10 hand-authored pilot submissions (<= 50 KB each), committed to git. Rest of `data/` stays gitignored.
+- Context: P1 gate is unreproducible without committed pilot submissions.
+- Documents amended: ARCHITECTURE.md §3
+- Reversible: yes
+
+### D-014: Add `compliance-review skills set-status` command
+- Date: 2026-11-05 · Decided by: human:arch
+- Decision: Add `compliance-review skills set-status --capability TEXT --version TEXT --status {draft|evaluating|active|deprecated}` to ARCHITECTURE.md §9.
+- Context: Only way to transition eval_status prior to P5 promotion.
+- Documents amended: ARCHITECTURE.md §9
+- Reversible: yes
+
+### D-015: Batched P0 ingestion stories in aaf052c
+- Date: 2026-11-05 · Decided by: human:arch / agent
+- Decision: Batched P0 ingestion stories in aaf052c; coupling in the ingestion module forced a single commit. P1 will split per story; if coupling forces a batch, a D-0xx entry is required BEFORE the commit.
+- Context: PROCESS-FIX-1 from P1 brief.
+- Documents amended: MEMORY.md §6
+- Reversible: no
+
+### D-016: Ignore UP017 in ruff to uphold ARCHITECTURE.md §2.7
 - Date: 2026-11-04 · Decided by: agent
 - Context: Ruff rule UP017 flags `timezone.utc` to recommend `datetime.UTC`. However, ARCHITECTURE.md §2.7 strictly specifies `stdlib datetime with timezone.utc everywhere`.
 - Decision: add `UP017` to ruff `ignore` list in `pyproject.toml`.

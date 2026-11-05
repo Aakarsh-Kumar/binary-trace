@@ -180,7 +180,8 @@ compliance-review/
 │   ├── report-structure/
 │   ├── code-quality/
 │   └── rai-disclosure/
-├── data/                                 # GITIGNORED
+├── data/                                 # GITIGNORED (except data/pilots/)
+│   ├── pilots/                           # 10 hand-authored pilot submissions (<= 50 KB each, committed) (D-013)
 │   ├── submissions/
 │   ├── labels/
 │   ├── vector_index/
@@ -538,8 +539,9 @@ class DatabaseError(ComplianceError): ...
 
 ```
 compliance-review ingest --source PATH --type {prose|code|mixed} [--external-id TEXT]
-compliance-review review --submission-id INT [--k INT=3] [--deterministic-only]
+compliance-review review --submission-id INT [--k INT=3] [--deterministic-only] [--skill-status {active|evaluating|draft|all}]
 compliance-review skills validate --root PATH=skills/
+compliance-review skills set-status --capability TEXT --version TEXT --status {draft|evaluating|active|deprecated}
 compliance-review skills promote --capability TEXT --version TEXT
 compliance-review skills demote  --capability TEXT --version TEXT
 compliance-review metrics --labels PATH --out PATH
@@ -550,6 +552,8 @@ compliance-review index rebuild
 Exit codes: `0` success · `1` validation/ingestion · `2` runtime · `3` invariant violation.
 
 `--deterministic-only` (D-009) runs the gate + deterministic checks, skips Qwen, and is used for the P0 gate demonstration.
+`--skill-status` (D-012, default `active`) filters skills by status (`active`, `evaluating`, `draft`, `all`). Exists only to let P1 exercise model-based v2 skills while v1 stays the production path.
+`skills set-status` (D-014) is the only way to set eval_status for a capability version prior to P5 promotion.
 
 ## 10. Streamlit Dashboard
 
