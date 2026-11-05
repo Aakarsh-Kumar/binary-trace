@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 0591391 |
-| Unit test count | 21 |
+| Last green commit | a79550f |
+| Unit test count | 27 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -117,10 +117,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] src/compliance_review/retrieval/ — US-14, US-15, US-16
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: a79550f
 - Tests: `tests/unit/test_retrieval_index.py`, CLI `compliance-review index rebuild`
 - Behaviour: Builds FAISS IndexFlatIP cosine index on L2-normalized sentence embeddings of skill metadata; implements version selection and NoActiveSkillError per ARCHITECTURE.md §6.3.
 - Depends on: `sentence-transformers`, `faiss-cpu`, `src/compliance_review/retrieval/vector_index.py`, `src/compliance_review/retrieval/selector.py`.
+- Supersedes: none
+
+### [2026-11-05] src/compliance_review/model/ — US-19, US-21, US-23
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_model_digest.py`, `tests/unit/test_schema_retry.py`
+- Behaviour: Implements Ollama Qwen3:4b client with frozen sampling parameters (temp=0.0, top_p=1.0, seed=run_index, num_predict=2048, format=json); resolves model_digest or strictly refuses execution; centralizes prompts; enforces ModelOutput schema validation with exactly one retry on failure.
+- Depends on: `ollama`, `src/compliance_review/model/`.
 - Supersedes: none
 
 ---
