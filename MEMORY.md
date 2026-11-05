@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | f809e0a |
-| Unit test count | 18 |
+| Last green commit | 0591391 |
+| Unit test count | 21 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -109,10 +109,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] skills/ — US-06, US-07, US-08
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: 0591391
 - Tests: `tests/unit/test_schema_validation.py`, `compliance-review skills validate --root skills/`
 - Behaviour: Authored 4 v2 skills with 2 model items each and location grammar evidence requirements; set status to evaluating via `skills set-status`.
 - Depends on: `src/compliance_review/skills/schema.py`, `src/compliance_review/skills/loader.py`.
+- Supersedes: none
+
+### [2026-11-05] src/compliance_review/retrieval/ — US-14, US-15, US-16
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_retrieval_index.py`, CLI `compliance-review index rebuild`
+- Behaviour: Builds FAISS IndexFlatIP cosine index on L2-normalized sentence embeddings of skill metadata; implements version selection and NoActiveSkillError per ARCHITECTURE.md §6.3.
+- Depends on: `sentence-transformers`, `faiss-cpu`, `src/compliance_review/retrieval/vector_index.py`, `src/compliance_review/retrieval/selector.py`.
 - Supersedes: none
 
 ---

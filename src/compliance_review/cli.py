@@ -194,10 +194,21 @@ def export_audit(
 
 
 @index_app.command("rebuild")
-def rebuild_index() -> None:
-    """Rebuild the FAISS skills vector index."""
-    typer.echo("index rebuild is not implemented until P1", err=True)
-    sys.exit(3)
+def rebuild_index(
+    skills_root: Path = typer.Option(Path("skills"), "--skills-root", help="Root skills directory"),
+    index_dir: Path = typer.Option(
+        Path("data/vector_index"), "--index-dir", help="Output directory for index"
+    ),
+) -> None:
+    """Rebuild the FAISS skills vector index (US-14/15/16)."""
+    from compliance_review.retrieval.vector_index import build_skills_index
+
+    try:
+        index_path, count = build_skills_index(skills_root, index_dir)
+        typer.echo(f"Built FAISS index with {count} skill versions at {index_path}")
+    except Exception as exc:
+        typer.echo(f"Error rebuilding index: {exc}", err=True)
+        sys.exit(2)
 
 
 if __name__ == "__main__":
