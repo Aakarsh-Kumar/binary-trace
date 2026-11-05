@@ -72,4 +72,3 @@ def test_invalid_grammar_fails_verification() -> None:
     )
     assert res.verified is False
     assert res.failure_reason == "location_grammar_invalid"
-

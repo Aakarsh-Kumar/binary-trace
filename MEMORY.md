@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | pending |
+| Last green commit | 8465de5 |
 | Unit test count | 43 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
@@ -157,7 +157,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] src/compliance_review/harness/ — US-19, US-24, US-25, US-28
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: 8465de5
 - Tests: `tests/unit/test_k_agreement.py`
 - Behaviour: Implements k-run harness with per-check verdict agreement and evidence Jaccard metrics; connects orchestrator pipeline (gate -> FAISS selector -> deterministic & model checks -> evidence verification -> downgrade unsupported flags to unsupported_evidence -> severity cap -> DB persistence); wires CLI `compliance-review review`.
 - Depends on: `src/compliance_review/harness/`, `src/compliance_review/db/repository.py`, `src/compliance_review/evidence/verifier.py`.
