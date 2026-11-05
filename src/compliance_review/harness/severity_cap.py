@@ -58,4 +58,3 @@ def apply_severity_cap_to_runs(
         capped_runs.append(capped_run)
 
     return capped_runs
-
