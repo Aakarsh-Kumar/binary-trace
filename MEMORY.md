@@ -24,9 +24,9 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 8465de5 |
+| Last green commit | pending |
 | Unit test count | 43 |
-| Integration test count | 6 |
+| Integration test count | 7 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -161,6 +161,14 @@ This file is the project's persistent memory. It is the first file an agent read
 - Tests: `tests/unit/test_k_agreement.py`
 - Behaviour: Implements k-run harness with per-check verdict agreement and evidence Jaccard metrics; connects orchestrator pipeline (gate -> FAISS selector -> deterministic & model checks -> evidence verification -> downgrade unsupported flags to unsupported_evidence -> severity cap -> DB persistence); wires CLI `compliance-review review`.
 - Depends on: `src/compliance_review/harness/`, `src/compliance_review/db/repository.py`, `src/compliance_review/evidence/verifier.py`.
+- Supersedes: none
+
+### [2026-11-05] tests/integration/test_evidence_gate_pilot.py — US-19..US-28
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/integration/test_evidence_gate_pilot.py`
+- Behaviour: Validates all 4 P1 evidence gate conditions across 10 pilot submissions: (a) every flag verdict has verified=True; (b) >= 1 pilot produces >= 1 unsupported_evidence row; (c) k=3 executions per (pilot, capability); (d) every execution has non-null model_digest. Configures `think=False` via client `_request_stream` to prevent reasoning token budget exhaustion.
+- Depends on: `src/compliance_review/harness/`, `src/compliance_review/evidence/verifier.py`, `src/compliance_review/model/`.
 - Supersedes: none
 
 ---

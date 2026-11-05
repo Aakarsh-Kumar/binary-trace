@@ -84,13 +84,34 @@ def call_qwen(
 
     start = time.perf_counter()
     try:
-        response = client.generate(
-            model=MODEL_NAME,
-            prompt=prompt,
-            stream=False,
-            format="json",
-            options=opts,
-        )
+        req_stream = getattr(client, "_request_stream", None)
+        if callable(req_stream):
+            response = req_stream(
+                "POST",
+                "/api/generate",
+                json={
+                    "model": MODEL_NAME,
+                    "prompt": prompt,
+                    "format": "json",
+                    "think": False,
+                    "options": {
+                        "temperature": 0.0,
+                        "top_p": 1.0,
+                        "seed": run_index,
+                        "num_predict": 2048,
+                    },
+                    "stream": False,
+                },
+                stream=False,
+            )
+        else:
+            response = client.generate(
+                model=MODEL_NAME,
+                prompt=prompt,
+                stream=False,
+                format="json",
+                options=opts,
+            )
         if isinstance(response, dict):
             raw_text = response.get("response", "")
         else:
