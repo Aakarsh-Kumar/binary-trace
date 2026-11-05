@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 2bbbd54 |
-| Unit test count | 30 |
+| Last green commit | ad5771e |
+| Unit test count | 34 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -133,10 +133,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] src/compliance_review/checks/model_based/ — US-20
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: ad5771e
 - Tests: `tests/unit/test_model_checks.py`
 - Behaviour: Implements model-based checklist evaluation for citation integrity, report structure, code quality, and Responsible-AI disclosure with schema retry integration.
 - Depends on: `src/compliance_review/model/`, `src/compliance_review/checks/model_based/`.
+- Supersedes: none
+
+### [2026-11-05] src/compliance_review/harness/severity_cap.py — US-22
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_severity_cap.py`
+- Behaviour: Enforces severity cap restricting {high, critical} to flag verdicts on deterministic items or model items with >= 2 of k runs in agreement; caps unverified severities to medium.
+- Depends on: `src/compliance_review/harness/severity_cap.py`.
 - Supersedes: none
 
 ---
