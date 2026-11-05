@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-11-04T17:00:03.826818+00:00",
+  "datasets": [
+    {
+      "name": "CiteMe v1",
+      "slug": "citeme_v1",
+      "url": "https://raw.githubusercontent.com/citeme-benchmark/citeme/main/data/citeme_v1.jsonl",
+      "sha256": "2f8035f66fb3a75e648807166ee543655b6da4e6f3f9d482ad6c5b842c82856c",
+      "size_bytes": 37,
+      "fetched_at": "2026-11-04T17:00:03.469459+00:00",
+      "sample_seed": null,
+      "sample_size": "full",
+      "status": "ready"
+    },
+    {
+      "name": "HALLMARK",
+      "slug": "hallmark",
+      "url": "https://raw.githubusercontent.com/hallmark-benchmark/hallmark/main/hallmark_data.json",
+      "sha256": "313c8b0d769d82d3e21cf3c4af779e77dd71b371368cb1852e5960603d135649",
+      "size_bytes": 36,
+      "fetched_at": "2026-11-04T17:00:03.483768+00:00",
+      "sample_seed": null,
+      "sample_size": "full",
+      "status": "ready"
+    },
+    {
+      "name": "PyMETA",
+      "slug": "pymeta",
+      "url": "https://raw.githubusercontent.com/pymeta-dataset/pymeta/main/sample_500.json",
+      "sha256": "68be3cddc6e7d635d08d7fdcab3ab08569991fdeb26a894138fd73eb6d606e42",
+      "size_bytes": 34,
+      "fetched_at": "2026-11-04T17:00:03.585790+00:00",
+      "sample_seed": 42,
+      "sample_size": 500,
+      "status": "ready"
+    },
+    {
+      "name": "FalconCode",
+      "slug": "falconcode",
+      "url": "https://raw.githubusercontent.com/falconcode-bench/falconcode/main/sample_500.json",
+      "sha256": "184886dc95e722bb1bfb5874f43f019492de7992237770daba7fbd92288886be",
+      "size_bytes": 38,
+      "fetched_at": "2026-11-04T17:00:03.688535+00:00",
+      "sample_seed": 42,
+      "sample_size": 500,
+      "status": "ready"
+    },
+    {
+      "name": "UJI TFG",
+      "slug": "uji_tfg",
+      "url": "https://raw.githubusercontent.com/uji-tfg/dataset/main/corpus.jsonl",
+      "sha256": "da6466e82b3c2762197cb0e716cfe985b3b3df123a721ab04c73b80c057636c1",
+      "size_bytes": 35,
+      "fetched_at": "2026-11-04T17:00:03.796818+00:00",
+      "sample_seed": null,
+      "sample_size": "full",
+      "status": "ready"
+    },
+    {
+      "name": "SkillsBench",
+      "slug": "skillsbench",
+      "url": "https://raw.githubusercontent.com/skillsbench/eval/main/benchmark.jsonl",
+      "sha256": "87c77249290531c703122d2efcaae71f91289269d6e292469fb9274cf22f1b8e",
+      "size_bytes": 39,
+      "fetched_at": "2026-11-04T17:00:03.809820+00:00",
+      "sample_seed": null,
+      "sample_size": "full",
+      "status": "ready"
+    },
+    {
+      "name": "SkillRet",
+      "slug": "skillret",
+      "url": "https://raw.githubusercontent.com/skillret/eval/main/retrieval_corpus.jsonl",
+      "sha256": "bbbec556fb571b8fa803e92f5c3ac2a6296275a8803d71ab08687fdd23e22137",
+      "size_bytes": 36,
+      "fetched_at": "2026-11-04T17:00:03.826818+00:00",
+      "sample_seed": null,
+      "sample_size": "full",
+      "status": "ready"
+    }
+  ]
+}
