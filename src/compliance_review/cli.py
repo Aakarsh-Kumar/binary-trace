@@ -9,7 +9,7 @@ import typer
 import typer.core
 
 from compliance_review.errors import DuplicateSubmissionError, IngestError, SkillValidationError
-from compliance_review.skills.loader import load_all_skills
+from compliance_review.skills.loader import load_all_skills, set_skill_status
 
 # Compatibility shim: Click 8.5+ breaking changes with Typer 0.12:
 # 1. Parameter.make_metavar() requires ctx argument.
@@ -76,6 +76,22 @@ def validate_skills(
         sys.exit(1)
 
 
+@skills_app.command("set-status")
+def set_status_cmd(
+    capability: str = typer.Option(..., "--capability", help="Capability name"),
+    version: str = typer.Option(..., "--version", help="Version identifier, e.g. v1, v2"),
+    status: str = typer.Option(..., "--status", help="draft | evaluating | active | deprecated"),
+    root: Path = typer.Option(Path("skills"), "--root", help="Root skills directory."),
+) -> None:
+    """Set eval_status for a capability version (US-08, D-014)."""
+    try:
+        updated_path = set_skill_status(root, capability, version, status)
+        typer.echo(f"Updated {capability}/{version} status to '{status}' at {updated_path}")
+    except SkillValidationError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+
 @skills_app.command("promote")
 def promote_skill(
     capability: str = typer.Option(..., help="Capability name"),
@@ -126,8 +142,21 @@ def review_submission(
     deterministic_only: bool = typer.Option(
         False, "--deterministic-only", help="Run gate + deterministic checks only (D-009)"
     ),
+    skill_status: str = typer.Option(
+        "active",
+        "--skill-status",
+        help="Filter skills by status: active (default) | evaluating | draft | all (D-012)",
+    ),
 ) -> None:
     """Review an ingested submission."""
+    valid_statuses = {"active", "evaluating", "draft", "all"}
+    if skill_status not in valid_statuses:
+        typer.echo(
+            f"Invalid --skill-status '{skill_status}'. Must be one of {valid_statuses}",
+            err=True,
+        )
+        sys.exit(1)
+
     if not deterministic_only:
         typer.echo(
             "Model-based review not implemented until P1; use --deterministic-only", err=True

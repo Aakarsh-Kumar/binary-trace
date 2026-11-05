@@ -85,3 +85,34 @@ def load_all_skills(skills_root: Path | str = "skills") -> dict[tuple[str, str],
         skills[key] = frontmatter
 
     return skills
+
+
+def set_skill_status(
+    skills_root: Path | str,
+    capability: str,
+    version: str,
+    status: str,
+) -> Path:
+    """Update eval_status in a SKILL.md frontmatter (US-08, D-014)."""
+    valid_statuses = {"draft", "evaluating", "active", "deprecated"}
+    if status not in valid_statuses:
+        raise SkillValidationError(f"Invalid status '{status}'. Must be one of {valid_statuses}")
+
+    skill_path = Path(skills_root) / capability / version / "SKILL.md"
+    if not skill_path.is_file():
+        raise SkillValidationError(f"SKILL.md not found at {skill_path}")
+
+    content = skill_path.read_text(encoding="utf-8")
+    raw_data, body = parse_skill_markdown(content)
+    raw_data["eval_status"] = status
+
+    # Validate updated frontmatter conforms to schema
+    try:
+        SkillFrontmatter.model_validate(raw_data)
+    except ValidationError as exc:
+        raise SkillValidationError(f"Schema validation error after updating status: {exc}") from exc
+
+    new_yaml = yaml.dump(raw_data, sort_keys=False, default_flow_style=False)
+    new_content = f"---\n{new_yaml}---\n{body.lstrip()}"
+    skill_path.write_text(new_content, encoding="utf-8")
+    return skill_path

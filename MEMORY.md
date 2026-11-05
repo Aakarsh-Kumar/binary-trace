@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | aaf052c |
-| Unit test count | 14 |
+| Last green commit | 66804c8 |
+| Unit test count | 18 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: draft` | 4 |
@@ -96,6 +96,14 @@ This file is the project's persistent memory. It is the first file an agent read
 - Tests: `tests/integration/test_ingest_deterministic.py`, CLI `compliance-review review --deterministic-only`
 - Behaviour: Executes deterministic checks on enabled capabilities and outputs structured trace table.
 - Depends on: `src/compliance_review/checks/deterministic/`, `src/compliance_review/db/repository.py`.
+- Supersedes: none
+
+### [2026-11-05] src/compliance_review/skills/loader.py, cli.py — US-08
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_skill_status.py`
+- Behaviour: Provides set_skill_status to transition eval_status in SKILL.md; adds CLI command `skills set-status` and `--skill-status` filter to `review`.
+- Depends on: `src/compliance_review/skills/loader.py`, `src/compliance_review/cli.py`.
 - Supersedes: none
 
 ---
