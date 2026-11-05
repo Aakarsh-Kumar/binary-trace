@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P1 |
-| Last completed milestone | M0 (P0 Definition of Done) |
+| Current phase | P1 (Complete, awaiting human sign-off for P2) |
+| Last completed milestone | M1 (P1 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | 54fc898 |
+| Last green commit | 5891de9 |
 | Unit test count | 43 |
 | Integration test count | 7 |
 | Skills at `eval_status: active` | 0 |
@@ -399,11 +399,11 @@ This file is the project's persistent memory. It is the first file an agent read
 - [x] Frozen invariant checklist (§1) all ticked
 
 ### P1 gate
-- [ ] Ollama reachable, `qwen3:4b` digest recorded in `skill_executions`
-- [ ] `ModelOutput` schema validation with one retry
-- [ ] Evidence verifier downgrades fabricated evidence on 10 pilot submissions
-- [ ] Every surfaced `flag` has a verified `evidence_verifications` row
-- [ ] k=3 stored per skill per submission
+- [x] Ollama reachable, `qwen3:4b` digest recorded in `skill_executions` (`359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7` verified in `skill_executions` via `tests/integration/test_evidence_gate_pilot.py` Gate Condition (d))
+- [x] `ModelOutput` schema validation with one retry (`src/compliance_review/model/schema_validation.py`, verified in `tests/unit/test_schema_retry.py`)
+- [x] Evidence verifier downgrades fabricated evidence on 10 pilot submissions (verified across 10 pilots in `tests/integration/test_evidence_gate_pilot.py` Gate Condition (b) and `data/pilots/PILOT_REPORT.md`: 54 flags downgraded to `unsupported_evidence`)
+- [x] Every surfaced `flag` has a verified `evidence_verifications` row (verified in `tests/integration/test_evidence_gate_pilot.py` Gate Condition (a): 100% of the 20 surfaced flags match `verified=True` rows in `evidence_verifications`)
+- [x] k=3 stored per skill per submission (verified in `tests/integration/test_evidence_gate_pilot.py` Gate Condition (c): exactly 3 runs per gated capability across all 10 pilots, 69 total execution rows in `skill_executions`)
 
 ### P2 gate
 - [ ] Labelled set 60–80 submissions, dual-annotated, adjudicated
