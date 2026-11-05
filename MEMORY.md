@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P1 |
 | Last completed milestone | M0 (P0 Definition of Done) |
 | Active branch | `main` |
-| Last green commit | a79550f |
-| Unit test count | 27 |
+| Last green commit | 2bbbd54 |
+| Unit test count | 30 |
 | Integration test count | 6 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -125,10 +125,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-05] src/compliance_review/model/ — US-19, US-21, US-23
 - Verified by: `agent:p1`
-- Commit: pending
+- Commit: 2bbbd54
 - Tests: `tests/unit/test_model_digest.py`, `tests/unit/test_schema_retry.py`
 - Behaviour: Implements Ollama Qwen3:4b client with frozen sampling parameters (temp=0.0, top_p=1.0, seed=run_index, num_predict=2048, format=json); resolves model_digest or strictly refuses execution; centralizes prompts; enforces ModelOutput schema validation with exactly one retry on failure.
 - Depends on: `ollama`, `src/compliance_review/model/`.
+- Supersedes: none
+
+### [2026-11-05] src/compliance_review/checks/model_based/ — US-20
+- Verified by: `agent:p1`
+- Commit: pending
+- Tests: `tests/unit/test_model_checks.py`
+- Behaviour: Implements model-based checklist evaluation for citation integrity, report structure, code quality, and Responsible-AI disclosure with schema retry integration.
+- Depends on: `src/compliance_review/model/`, `src/compliance_review/checks/model_based/`.
 - Supersedes: none
 
 ---
