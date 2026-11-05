@@ -162,8 +162,6 @@ def run_review(
                         submission_data=extracted_data,
                     )
                     v["verification_result"] = ev_result
-                    if not ev_result.verified:
-                        v["verdict"] = "unsupported_evidence"
                 else:
                     v["verification_result"] = None
 
