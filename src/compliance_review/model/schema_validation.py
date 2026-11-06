@@ -63,8 +63,11 @@ def execute_model_evaluation_with_retry(
       status is 'ok' or 'schema_error'.
     """
     # Attempt 1
-    raw_text, digest, latency_1 = call_qwen(prompt, run_index=run_index, client=client)
-    total_latency = latency_1
+    try:
+        raw_text, digest, latency_1 = call_qwen(prompt, run_index=run_index, client=client)
+        total_latency = latency_1
+    except Exception as exc:
+        return "error", None, "0" * 64, 0, str(exc)
 
     try:
         model_output = parse_and_validate_model_output(raw_text, expected_capability=capability)
@@ -74,8 +77,11 @@ def execute_model_evaluation_with_retry(
 
     # Attempt 2 (Retry EXACTLY once with validation error appended)
     retry_prompt = build_retry_prompt(validation_error=error_msg, raw_output=raw_text)
-    raw_text_2, digest, latency_2 = call_qwen(retry_prompt, run_index=run_index, client=client)
-    total_latency += latency_2
+    try:
+        raw_text_2, digest, latency_2 = call_qwen(retry_prompt, run_index=run_index, client=client)
+        total_latency += latency_2
+    except Exception as exc:
+        return "schema_error", None, digest, total_latency, str(exc)
 
     try:
         model_output = parse_and_validate_model_output(raw_text_2, expected_capability=capability)

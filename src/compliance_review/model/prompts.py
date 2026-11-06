@@ -15,24 +15,36 @@ JSON_SCHEMA_DESCRIPTION = """Your output MUST be a JSON object with this exact s
       "check_id": "<exact_check_id>",
       "verdict": "pass" | "flag" | "not_applicable",
       "severity": "low" | "medium" | "high" | "critical",
-      "evidence_text": "<verbatim quotation from the submission text or null>",
-      "evidence_location": "<location string or null>",
-      "confidence": <float between 0.0 and 1.0>
+      "evidence_text": "<verbatim quotation from submission, 20-200 chars, or null>",
+      "evidence_location": "<exact location grammar or null>",
+      "confidence": 1.0
     }
   ]
 }
 
-CRITICAL RULES FOR EVIDENCE:
-1. When verdict is 'flag', evidence_text and evidence_location are MANDATORY.
-2. evidence_text MUST be an EXACT, VERBATIM substring directly copied from the submission.
-   Do not paraphrase or edit characters. Any alteration will fail automated verification.
-3. evidence_location MUST strictly conform to the location grammar:
-   - page:<page_number>              (e.g. page:1)
-   - file:<relative_path>:<line_num> (e.g. file:src/main.py:12)
-   - section:<section_slug>          (e.g. section:methods, section:disclosure)
-4. When verdict is 'pass' or 'not_applicable' and no span is cited,
-   evidence_text and evidence_location may be null.
-5. severity must match the checklist item severity unless strong mitigating context applies.
+CRITICAL RULES:
+1. "confidence" is MANDATORY on EVERY verdict (including pass and not_applicable).
+   It MUST be a bare float between 0.0 and 1.0 (e.g. 1.0 or 0.95).
+   Never omit confidence, never enclose it in quotes, and never prefix it with colons.
+2. When verdict is 'flag', evidence_text and evidence_location are MANDATORY:
+   - evidence_text MUST be a verbatim substring directly copied from the submission.
+   - Evidence length must be between 20 and 200 characters.
+   - QUOTATION ONLY, NO SUMMARIES: Do NOT explain or describe the issue in evidence_text.
+     For example, do NOT write "syntax error" or "missing try/except".
+     Copy the exact offending text or code line directly from the source.
+   - Any alteration, paraphrase, or hallucination will fail automated verification.
+3. evidence_location MUST strictly follow one of these three exact formats:
+   - file:<relative_path>:<line_number> (e.g. file:broken.py:6 or file:server.py:9)
+   - section:<slug>                     (e.g. section:methods or section:disclosure)
+   - page:<page_number>                 (e.g. page:1)
+4. NEGATIVE EXAMPLES OF REJECTED LOCATIONS:
+   - "file:broken.py" (REJECTED: missing line number)
+   - "broken.py:6" or "line:6" (REJECTED: missing file: prefix)
+   - "section:References [1]" (REJECTED: invalid characters in slug)
+5. When verdict is 'pass' or 'not_applicable' and no span is cited:
+   - set "evidence_text": null
+   - set "evidence_location": null
+   - set "confidence": 1.0
 """
 
 CAPABILITY_REVIEW_PROMPT_TEMPLATE = """{system_instruction}
