@@ -157,6 +157,11 @@ checklist_verdicts = Table(
     Column("evidence_location", String(512), nullable=True),
     Column("confidence", Numeric(3, 2), nullable=True),
     Column(
+        "check_source",
+        Enum("deterministic", "model", name="check_source_enum"),
+        nullable=False,
+    ),
+    Column(
         "created_at",
         TIMESTAMP,
         nullable=False,

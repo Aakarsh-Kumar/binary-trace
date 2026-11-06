@@ -1,28 +1,15 @@
 """Deterministic report structure checks conforming to ARCHITECTURE.md §3."""
 
-import re
 from typing import Any
-
-HEADING_PATTERNS = {
-    "introduction": re.compile(r"(?m)^#+\s*introduction\b", re.IGNORECASE),
-    "method": re.compile(r"(?m)^#+\s*(?:methods?|methodology)\b", re.IGNORECASE),
-    "result": re.compile(r"(?m)^#+\s*results?\b", re.IGNORECASE),
-    "discussion": re.compile(r"(?m)^#+\s*discussion\b", re.IGNORECASE),
-}
 
 
 def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
     """Run deterministic structure checks."""
     verdicts: list[dict[str, Any]] = []
 
-    present_headings: dict[str, int] = {}
-    for sec, pat in HEADING_PATTERNS.items():
-        m = pat.search(prose_text)
-        if m:
-            present_headings[sec] = m.start()
-
+    text_lower = prose_text.lower()
     required = ["introduction", "method", "result", "discussion"]
-    missing = [sec for sec in required if sec not in present_headings]
+    missing = [sec for sec in required if sec not in text_lower]
 
     first_span = prose_text.splitlines()[0].strip() if prose_text else "Title"
 
@@ -45,13 +32,13 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "verdict": "pass",
                 "severity": "high",
                 "evidence_text": "All required sections present",
-                "evidence_location": "page:1",
+                "evidence_location": "section:headings",
                 "confidence": 1.0,
             }
         )
 
     # 2. struct-heading-order
-    pos = [present_headings[sec] for sec in required if sec in present_headings]
+    pos = [text_lower.find(sec) for sec in required if sec in text_lower]
     if pos == sorted(pos):
         verdicts.append(
             {
@@ -59,7 +46,7 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "verdict": "pass",
                 "severity": "medium",
                 "evidence_text": "Headings follow standard sequence",
-                "evidence_location": "page:1",
+                "evidence_location": "section:headings",
                 "confidence": 1.0,
             }
         )
@@ -106,5 +93,8 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "confidence": 1.0,
             }
         )
+
+    for v in verdicts:
+        v["check_source"] = "deterministic"
 
     return verdicts

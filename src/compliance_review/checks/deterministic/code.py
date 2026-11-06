@@ -111,4 +111,7 @@ def check_code(files_dict: dict[str, str], repo_dir: Path | None = None) -> list
         }
     )
 
+    for v in verdicts:
+        v["check_source"] = "deterministic"
+
     return verdicts

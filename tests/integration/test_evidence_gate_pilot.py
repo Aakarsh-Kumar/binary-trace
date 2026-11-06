@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import text
 
-from compliance_review.db.repository import get_engine
+from compliance_review.db.engine import get_engine
 from compliance_review.harness.orchestrator import run_review
 from compliance_review.ingestion.orchestrator import ingest_source
 

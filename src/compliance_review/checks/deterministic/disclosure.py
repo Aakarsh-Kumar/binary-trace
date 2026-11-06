@@ -141,4 +141,7 @@ def check_disclosure(prose_text: str, has_disclosure_file: bool = False) -> list
             }
         )
 
+    for v in verdicts:
+        v["check_source"] = "deterministic"
+
     return verdicts

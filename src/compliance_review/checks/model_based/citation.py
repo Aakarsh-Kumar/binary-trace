@@ -37,6 +37,8 @@ def evaluate_citation_model_checks(
     verdicts: list[dict[str, Any]] = []
     if model_output is not None:
         for v in model_output.verdicts:
-            verdicts.append(v.model_dump())
+            vd = v.model_dump()
+            vd["check_source"] = "model"
+            verdicts.append(vd)
 
     return status, verdicts, digest, latency, raw

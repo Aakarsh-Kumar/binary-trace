@@ -190,6 +190,7 @@ def record_deterministic_execution_and_verdicts(
                     evidence_text=vd.get("evidence_text"),
                     evidence_location=vd.get("evidence_location"),
                     confidence=vd.get("confidence", 1.0),
+                    check_source=vd.get("check_source", "deterministic"),
                 )
                 cv_res = conn.execute(cv_stmt)
                 cv_pk = cv_res.inserted_primary_key
@@ -336,6 +337,7 @@ def record_skill_execution_run(
                     evidence_text=vd.get("evidence_text"),
                     evidence_location=vd.get("evidence_location"),
                     confidence=vd.get("confidence", 1.0),
+                    check_source=vd.get("check_source", "deterministic"),
                 )
                 cv_res = conn.execute(cv_stmt)
                 cv_pk = cv_res.inserted_primary_key

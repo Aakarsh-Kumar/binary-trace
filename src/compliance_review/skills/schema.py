@@ -70,6 +70,7 @@ class ModelVerdict(BaseModel):
     evidence_text: str | None = None
     evidence_location: str | None = None
     confidence: float = Field(ge=0.0, le=1.0)
+    check_source: Literal["deterministic", "model"] = "model"
     model_config = ConfigDict(extra="forbid")
 
 
