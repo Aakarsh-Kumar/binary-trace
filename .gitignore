@@ -21,6 +21,8 @@ data/raw/*
 !data/raw/MANIFEST.json
 !data/pilots/
 data/pilots/PILOT_REPORT.md
+!data/labels/
+data/labels/CORPUS_STATE.json
 
 # IDE / OS
 .idea/
