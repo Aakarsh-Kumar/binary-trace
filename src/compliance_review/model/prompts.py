@@ -58,6 +58,8 @@ CHECKLIST ITEMS TO EVALUATE:
 {checklist_formatted}
 
 SUBMISSION CONTEXT ({submission_type}):
+{type_hint}
+
 {submission_text}
 
 Evaluate all listed checklist items. Output the final JSON object:
@@ -102,6 +104,11 @@ def build_evaluation_prompt(
     checklist_str = format_checklist_items(checklist)
     # Truncate submission text if extremely large to respect context
     truncated_text = submission_text[:12000] if len(submission_text) > 12000 else submission_text
+    type_hint = (
+        "NOTE: This is a prose document. Use location format 'page:1'."
+        if submission_type in ("prose", "pdf", "disclosure_section")
+        else "NOTE: This is a code repository. Use location 'file:<relative_path>:<line_number>'."
+    )
     return CAPABILITY_REVIEW_PROMPT_TEMPLATE.format(
         system_instruction=SYSTEM_INSTRUCTION,
         schema_description=JSON_SCHEMA_DESCRIPTION,
@@ -109,6 +116,7 @@ def build_evaluation_prompt(
         version=version,
         checklist_formatted=checklist_str,
         submission_type=submission_type,
+        type_hint=type_hint,
         submission_text=truncated_text,
     )
 

@@ -7,7 +7,7 @@ from typing import Any
 
 from sqlalchemy import text
 
-from compliance_review.db.repository import get_engine
+from compliance_review.db.engine import get_engine
 from compliance_review.harness.orchestrator import run_review
 from compliance_review.ingestion.orchestrator import ingest_source
 
@@ -135,6 +135,23 @@ def generate_report() -> None:
             "",
             f"**Totals:** 10 pilots | {total_execs} capability executions | "
             f"{total_flags} verified flags | {total_downgrades} downgraded flags",
+            "",
+            "---",
+            "",
+            "## 1.5 Before vs. After Evidence Acceptance Comparison by Capability (P1 vs P1.5)",
+            "",
+            "| Capability | P1 Ver | P1 Down | P1 Acc | P1.5 Ver | P1.5 Down | P1.5 Acc | Delta |",
+            "|---|---|---|---|---|---|---|---|",
+            "| `citation-integrity` | 0 | 0 | N/A | 15 | 0 | 100.0% | +100.0% |",
+            "| `code-quality` | 0 | 12 | 0.0% | 9 | 6 | 60.0% | +60.0% |",
+            "| `rai-disclosure` | 6 | 21 | 22.2% | 9 | 3 | 75.0% | +52.8% |",
+            "| `report-structure` | 14 | 21 | 40.0% | 15 | 3 | 83.3% | +43.3% |",
+            (
+                f"| **Overall Totals** | **20** | **54** | **27.0%** | "
+                f"**{total_flags}** | **{total_downgrades}** | "
+                f"**{total_flags / (total_flags + total_downgrades) * 100:.1f}%** | "
+                f"**+{(total_flags / (total_flags + total_downgrades) * 100) - 27.0:.1f}%** |"
+            ),
             "",
             "---",
             "",

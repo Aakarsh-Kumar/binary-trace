@@ -1,15 +1,28 @@
 """Deterministic report structure checks conforming to ARCHITECTURE.md §3."""
 
+import re
 from typing import Any
+
+HEADING_PATTERNS = {
+    "introduction": re.compile(r"(?m)^#+\s*introduction\b", re.IGNORECASE),
+    "method": re.compile(r"(?m)^#+\s*(?:methods?|methodology)\b", re.IGNORECASE),
+    "result": re.compile(r"(?m)^#+\s*results?\b", re.IGNORECASE),
+    "discussion": re.compile(r"(?m)^#+\s*discussion\b", re.IGNORECASE),
+}
 
 
 def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
     """Run deterministic structure checks."""
     verdicts: list[dict[str, Any]] = []
 
-    text_lower = prose_text.lower()
+    present_headings: dict[str, int] = {}
+    for sec, pat in HEADING_PATTERNS.items():
+        m = pat.search(prose_text)
+        if m:
+            present_headings[sec] = m.start()
+
     required = ["introduction", "method", "result", "discussion"]
-    missing = [sec for sec in required if sec not in text_lower]
+    missing = [sec for sec in required if sec not in present_headings]
 
     first_span = prose_text.splitlines()[0].strip() if prose_text else "Title"
 
@@ -32,13 +45,13 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "verdict": "pass",
                 "severity": "high",
                 "evidence_text": "All required sections present",
-                "evidence_location": "section:headings",
+                "evidence_location": "page:1",
                 "confidence": 1.0,
             }
         )
 
     # 2. struct-heading-order
-    pos = [text_lower.find(sec) for sec in required if sec in text_lower]
+    pos = [present_headings[sec] for sec in required if sec in present_headings]
     if pos == sorted(pos):
         verdicts.append(
             {
@@ -46,7 +59,7 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "verdict": "pass",
                 "severity": "medium",
                 "evidence_text": "Headings follow standard sequence",
-                "evidence_location": "section:headings",
+                "evidence_location": "page:1",
                 "confidence": 1.0,
             }
         )

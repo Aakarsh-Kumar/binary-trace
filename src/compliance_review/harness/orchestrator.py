@@ -223,7 +223,11 @@ def run_review(
             f"(score={sel_item['score']}, reason={sel_item['reason']})"
         )
 
-    verdicts_header = "Deterministic Verdicts:" if deterministic_only else "Checklist Verdicts (Run 1 / Consistency):"
+    verdicts_header = (
+        "Deterministic Verdicts:"
+        if deterministic_only
+        else "Checklist Verdicts (Run 1 / Consistency):"
+    )
     trace_lines.append(f"\n{verdicts_header}")
     for cap, verdicts in all_final_verdicts.items():
         trace_lines.append(f"  Capability: {cap}")

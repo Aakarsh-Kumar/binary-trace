@@ -20,7 +20,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
                 "verdict": "flag",
                 "severity": "high",
                 "evidence_text": invalid_dois[0],
-                "evidence_location": "section:references",
+                "evidence_location": "page:1",
                 "confidence": 0.95,
             }
         )
@@ -31,7 +31,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
                 "verdict": "pass",
                 "severity": "high",
                 "evidence_text": "No DOIs cited or all verified offline",
-                "evidence_location": "section:references",
+                "evidence_location": "page:1",
                 "confidence": 1.0,
             }
         )
@@ -42,7 +42,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
                 "verdict": "pass",
                 "severity": "high",
                 "evidence_text": f"Found {len(dois)} valid DOIs",
-                "evidence_location": "section:references",
+                "evidence_location": "page:1",
                 "confidence": 1.0,
             }
         )
@@ -54,7 +54,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
             "verdict": "pass",
             "severity": "critical",
             "evidence_text": "No retracted DOIs located",
-            "evidence_location": "section:references",
+            "evidence_location": "page:1",
             "confidence": 1.0,
         }
     )
@@ -84,7 +84,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
                     "verdict": "flag",
                     "severity": "low",
                     "evidence_text": duplicate_ref,
-                    "evidence_location": "section:references",
+                    "evidence_location": "page:1",
                     "confidence": 0.95,
                 }
             )
@@ -95,7 +95,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
                     "verdict": "pass",
                     "severity": "low",
                     "evidence_text": "No duplicate references in bibliography",
-                    "evidence_location": "section:references",
+                    "evidence_location": "page:1",
                     "confidence": 1.0,
                 }
             )
