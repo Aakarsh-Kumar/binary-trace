@@ -52,11 +52,13 @@ skills_app = typer.Typer(help="Manage and validate skills library.")
 audit_app = typer.Typer(help="Audit log commands.")
 index_app = typer.Typer(help="Vector index operations.")
 reviewer_app = typer.Typer(help="Reviewer feedback operations.")
+labels_app = typer.Typer(help="Label dataset and bootstrapping operations.")
 
 app.add_typer(skills_app, name="skills")
 app.add_typer(audit_app, name="audit")
 app.add_typer(index_app, name="index")
 app.add_typer(reviewer_app, name="reviewer")
+app.add_typer(labels_app, name="labels")
 
 
 @skills_app.command("validate")
@@ -343,6 +345,143 @@ def reviewer_feedback_cmd(
         )
     except Exception as exc:
         typer.echo(f"Error recording reviewer feedback: {exc}", err=True)
+        sys.exit(2)
+
+
+@labels_app.command("bootstrap")
+def bootstrap_labels_cmd(
+    submissions: Path = typer.Option(..., help="Path to submissions manifest JSON"),
+    out: Path = typer.Option(..., help="Output CSV path for provisional labels"),
+) -> None:
+    """Export provisional labels for evaluation corpus from model review runs (US-35, Mode B)."""
+    import csv
+    import json
+
+    from sqlalchemy import select
+
+    from compliance_review.db.engine import get_engine
+    from compliance_review.db.tables import checklist_verdicts, skill_executions
+    from compliance_review.db.tables import submissions as subs_tbl
+
+    if not submissions.exists():
+        typer.echo(f"Error: Manifest file not found: {submissions}", err=True)
+        sys.exit(1)
+
+    try:
+        data = json.loads(submissions.read_text(encoding="utf-8"))
+        if isinstance(data, dict) and "submissions" in data:
+            sub_list = data["submissions"]
+        elif isinstance(data, list):
+            sub_list = data
+        else:
+            typer.echo("Error: Invalid submissions JSON format", err=True)
+            sys.exit(1)
+
+        sub_ids = [int(s["submission_id"]) for s in sub_list if "submission_id" in s]
+        if not sub_ids:
+            typer.echo("No submission_id entries found in manifest", err=True)
+            sys.exit(1)
+
+        engine = get_engine()
+        with engine.connect() as conn:
+            # Query external_ids
+            sub_rows = conn.execute(
+                select(subs_tbl.c.id, subs_tbl.c.external_id).where(subs_tbl.c.id.in_(sub_ids))
+            ).fetchall()
+            ext_map: dict[int, str] = {int(r[0]): str(r[1]) for r in sub_rows}
+
+            # Query verdicts for run_index 1
+            stmt = (
+                select(
+                    skill_executions.c.submission_id,
+                    skill_executions.c.skill_capability,
+                    skill_executions.c.skill_version,
+                    checklist_verdicts.c.check_id,
+                    checklist_verdicts.c.verdict,
+                    checklist_verdicts.c.evidence_text,
+                    checklist_verdicts.c.evidence_location,
+                )
+                .select_from(
+                    checklist_verdicts.join(
+                        skill_executions,
+                        checklist_verdicts.c.execution_id == skill_executions.c.id,
+                    )
+                )
+                .where(
+                    skill_executions.c.submission_id.in_(sub_ids),
+                    skill_executions.c.run_index == 1,
+                )
+                .order_by(
+                    skill_executions.c.submission_id,
+                    skill_executions.c.skill_capability,
+                    checklist_verdicts.c.check_id,
+                )
+            )
+            v_rows = conn.execute(stmt).fetchall()
+
+        fieldnames = [
+            "submission_id",
+            "external_id",
+            "skill_capability",
+            "skill_version",
+            "check_id",
+            "gold_verdict",
+            "gold_evidence_text",
+            "gold_evidence_location",
+            "annotator_1",
+            "annotator_2",
+            "adjudicator",
+            "adjudication_status",
+        ]
+
+        csv_rows: list[dict[str, Any]] = []
+        for r in v_rows:
+            sid = int(r.submission_id)
+            verd = str(r.verdict)
+            if verd == "flag":
+                prov_verdict = "flag"
+                ev_text = str(r.evidence_text or "")
+                ev_loc = str(r.evidence_location or "")
+            elif verd == "not_applicable":
+                prov_verdict = "not_applicable"
+                ev_text = ""
+                ev_loc = ""
+            else:
+                prov_verdict = "no_flag"
+                ev_text = ""
+                ev_loc = ""
+
+            csv_rows.append(
+                {
+                    "submission_id": sid,
+                    "external_id": ext_map.get(sid, f"sub_{sid}"),
+                    "skill_capability": str(r.skill_capability),
+                    "skill_version": str(r.skill_version),
+                    "check_id": str(r.check_id),
+                    "gold_verdict": prov_verdict,
+                    "gold_evidence_text": ev_text,
+                    "gold_evidence_location": ev_loc,
+                    "annotator_1": "agent:bootstrap",
+                    "annotator_2": "",
+                    "adjudicator": "",
+                    "adjudication_status": "pending",
+                }
+            )
+
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(csv_rows)
+
+        flags_count = sum(1 for r in csv_rows if r["gold_verdict"] == "flag")
+        typer.echo(
+            f"Bootstrapped {len(csv_rows)} provisional labels "
+            f"({flags_count} flags, {len(csv_rows) - flags_count} non-flags) across "
+            f"{len(sub_ids)} submissions to {out}"
+        )
+    except Exception as exc:
+        typer.echo(f"Error bootstrapping labels: {exc}", err=True)
         sys.exit(2)
 
 

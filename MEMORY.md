@@ -21,12 +21,12 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P1.5 Complete (Evidence Quality Investigation Resolved; Ready for P2 sign-off) |
-| Last completed milestone | P1.5 (Milestone M1 Evidence Quality Investigation) |
+| Current phase | P2-code Complete (Stopping Point 1: Ready for Annotation Decision Mode A vs B) |
+| Last completed milestone | P2-code (Evaluation Corpus, Schema, Metrics CLI, Read-only Contract, Feedback CLI, Bootstrap) |
 | Active branch | `main` |
-| Last green commit | f6003bf |
-| Unit test count | 43 |
-| Integration test count | 7 |
+| Last green commit | b5d62e5 |
+| Unit test count | 57 |
+| Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -58,6 +58,24 @@ This file is the project's persistent memory. It is the first file an agent read
 ---
 
 ## 2. Verified Implementations
+
+### [2026-11-07] Phase P2-code Implementation (Tasks 1..11, Stopping Point 1)
+- Verified by: `agent:p2-code`
+- Commits: a47788f, 2eef891, 23b36c2, f40b82e, 871e625, 865b9d5, 42c9447, 34ade35, f1c86a7, fb4a174
+- Tests: `tests/unit/test_check_source_tag.py`, `tests/unit/test_labels_schema.py`, `tests/unit/test_insufficient_sample.py`, `tests/unit/test_pre_post_metrics.py`, `tests/unit/test_reviewer_feedback.py`, `tests/unit/test_labels_bootstrap.py`, `tests/integration/test_metrics_readonly.py`
+- Behaviour:
+  - D-018..D-020: Enacted pre/post verifier precision/recall definitions, check_source tag (`deterministic` vs `model`), and metrics dashboard layout.
+  - US-20: Alembic migrations 0003 & 0004 backfilled and migrated `checklist_verdicts.check_source`, tagged across all 12 deterministic checks and model check extractions.
+  - docs: Created comprehensive `docs/annotation_guideline.md` v1.0 with 12-column schema, positive & negative worked examples for all 4 capabilities, ambiguity rule (default to not_applicable/no_flag, never flag), inter-annotator procedure, and Modes A & B.
+  - US-35: Created `data/labels/TEMPLATE.csv`, `README.md`, and `sample_5.csv`.
+  - US-01..US-03: Built 60 evaluation submissions (20 prose, 20 code, 20 mixed with CiteMe correct/corrupted/fabricated DOIs and 5 HALLMARK adversarial prompts) and ingested into MySQL.
+  - US-35: Implemented `src/compliance_review/metrics/compute.py` with pre/post verifier split, confusion matrices, consistency metrics, and `< 10` gold items insufficient-sample guard.
+  - US-35: Added `compliance-review metrics --labels PATH --out PATH` exporting JSON and CSV.
+  - US-31/32: Added `compliance-review reviewer feedback` with atomic audit logging via `record_reviewer_feedback`.
+  - US-35: Proved read-only contract for metrics via `test_metrics_readonly.py`.
+  - Batch Review & Bootstrap: Reviewed all 60 corpus submissions under k=3 with `--skill-status evaluating`, recorded state in `data/labels/CORPUS_STATE.json`, added `compliance-review labels bootstrap`, and exported 650 provisional labels to `data/labels/provisional_v1.csv` for Mode B human audit.
+- Depends on: P1 & P1.5 harness, verifier, schemas, and DB.
+- Supersedes: none
 
 ### [2026-11-06] src/compliance_review/ - P1.5 Evidence Quality Investigation & Prompt/Grounding Refinements
 - Verified by: `agent:p1.5`
