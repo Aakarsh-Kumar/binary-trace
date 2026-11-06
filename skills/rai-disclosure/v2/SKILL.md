@@ -11,7 +11,7 @@ checklist:
 - id: rai-section-present
   question: Is an AI or Responsible-AI disclosure section present in the submission?
   severity: high
-  evidence_requirement: section:disclosure
+  evidence_requirement: section:disclosure (verbatim sentence from disclosure)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -19,7 +19,7 @@ checklist:
 - id: rai-tool-named
   question: Does the disclosure explicitly name the AI assistance tools utilized?
   severity: medium
-  evidence_requirement: section:disclosure
+  evidence_requirement: section:disclosure (verbatim sentence from disclosure)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -28,7 +28,7 @@ checklist:
   question: Does the disclosure specify the exact tasks AI was employed to assist
     with?
   severity: medium
-  evidence_requirement: section:disclosure
+  evidence_requirement: section:disclosure (verbatim sentence from disclosure)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -37,7 +37,7 @@ checklist:
   question: Is the disclosure sufficiently detailed to assess whether academic integrity
     policies were respected?
   severity: high
-  evidence_requirement: section:disclosure
+  evidence_requirement: section:disclosure (verbatim sentence from disclosure)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:
@@ -47,7 +47,7 @@ checklist:
   question: Does the disclosure explain how generated outputs were reviewed, verified,
     or corrected by the author?
   severity: medium
-  evidence_requirement: section:disclosure
+  evidence_requirement: section:disclosure (verbatim sentence from disclosure)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:

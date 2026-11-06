@@ -10,7 +10,7 @@ checklist:
 - id: struct-required-sections
   question: Are required sections (Introduction, Methods, Results, Discussion) present?
   severity: high
-  evidence_requirement: section:headings
+  evidence_requirement: page:1 (verbatim section heading line)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -18,7 +18,7 @@ checklist:
 - id: struct-heading-order
   question: Are headings placed in an admissible logical progression?
   severity: medium
-  evidence_requirement: section:headings
+  evidence_requirement: page:1 (verbatim section heading line)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -26,7 +26,7 @@ checklist:
 - id: struct-minimum-length
   question: Does the report satisfy the minimum 500 words requirement?
   severity: medium
-  evidence_requirement: page:1
+  evidence_requirement: page:1 (verbatim title or opening sentence)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -35,7 +35,7 @@ checklist:
   question: Does each section transition logically into the subsequent section without
     abrupt topical disconnects?
   severity: medium
-  evidence_requirement: section:methods
+  evidence_requirement: section:methods (verbatim section transition text)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:
@@ -45,7 +45,7 @@ checklist:
   question: Are quantitative claims in the discussion substantiated by reported results
     or data tables?
   severity: high
-  evidence_requirement: section:discussion
+  evidence_requirement: section:discussion (verbatim discussion claim sentence)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:

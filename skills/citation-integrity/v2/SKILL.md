@@ -10,7 +10,7 @@ checklist:
 - id: cite-doi-resolvable
   question: Are all cited DOIs resolvable via Crossref API?
   severity: high
-  evidence_requirement: page:N
+  evidence_requirement: section:references (verbatim DOI string)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -18,7 +18,7 @@ checklist:
 - id: cite-not-retracted
   question: Are cited works free from known retractions in Crossref/OpenAlex?
   severity: critical
-  evidence_requirement: page:N
+  evidence_requirement: section:references (verbatim reference entry)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -26,7 +26,7 @@ checklist:
 - id: cite-no-duplicates
   question: Is the bibliography free of duplicate references?
   severity: low
-  evidence_requirement: section:references
+  evidence_requirement: section:references (verbatim duplicate entry)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -35,7 +35,7 @@ checklist:
   question: Does the cited source actually support the empirical claim made in the
     text?
   severity: high
-  evidence_requirement: page:N
+  evidence_requirement: page:1 (verbatim sentence of claim or citation)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:
@@ -44,7 +44,7 @@ checklist:
 - id: cite-context-accurate
   question: Is the source summarized or quoted without distorting its primary conclusion?
   severity: medium
-  evidence_requirement: page:N
+  evidence_requirement: page:1 (verbatim sentence of claim or citation)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:

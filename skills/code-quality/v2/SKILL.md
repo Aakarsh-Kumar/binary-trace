@@ -10,7 +10,7 @@ checklist:
   question: Is the Python codebase free from Ruff syntax and undefined name errors
     (E9, F)?
   severity: critical
-  evidence_requirement: file:P:L
+  evidence_requirement: file:PATH:LINE (verbatim syntax error line)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -18,7 +18,7 @@ checklist:
 - id: code-file-loc-limit
   question: Are all source code files within the 300 lines of code limit?
   severity: medium
-  evidence_requirement: file:P:L
+  evidence_requirement: file:PATH:1 (first line of module)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -26,7 +26,7 @@ checklist:
 - id: code-pylint-clean
   question: Does the code pass basic pylint syntax and import inspections?
   severity: low
-  evidence_requirement: file:P:L
+  evidence_requirement: file:PATH:1 (first line of module)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -35,7 +35,8 @@ checklist:
   question: Are error conditions and edge cases safely handled rather than silently
     swallowed?
   severity: medium
-  evidence_requirement: file:P:L
+  evidence_requirement: file:PATH:LINE (verbatim code line, e.g. function call or
+    handler)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:
@@ -44,7 +45,8 @@ checklist:
 - id: code-modularity
   question: Are core responsibilities separated into testable functions with low coupling?
   severity: medium
-  evidence_requirement: file:P:L
+  evidence_requirement: file:PATH:LINE (verbatim code line, e.g. function call or
+    handler)
   deterministic_only: false
   advisory: false
   false_positive_guardrails:
