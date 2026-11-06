@@ -206,8 +206,9 @@ def run_review(
     # Format trace table
     ext_id = sub["external_id"]
     mode_str = "Deterministic-Only" if deterministic_only else f"k={k} Full Review"
+    header_prefix = "Deterministic Review Trace" if deterministic_only else "Review Trace"
     trace_lines = [
-        f"--- Review Trace for Submission #{submission_id} ({ext_id}) [{mode_str}] ---",
+        f"--- {header_prefix} for Submission #{submission_id} ({ext_id}) [{mode_str}] ---",
         f"Submission Type: {sub_type} | Latency: {total_latency_ms} ms",
         "\nCapabilities Gated:",
     ]
@@ -222,7 +223,8 @@ def run_review(
             f"(score={sel_item['score']}, reason={sel_item['reason']})"
         )
 
-    trace_lines.append("\nChecklist Verdicts (Run 1 / Consistency):")
+    verdicts_header = "Deterministic Verdicts:" if deterministic_only else "Checklist Verdicts (Run 1 / Consistency):"
+    trace_lines.append(f"\n{verdicts_header}")
     for cap, verdicts in all_final_verdicts.items():
         trace_lines.append(f"  Capability: {cap}")
         for v in verdicts:

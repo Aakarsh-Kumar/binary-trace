@@ -1,5 +1,6 @@
 """Deterministic code quality checks conforming to ARCHITECTURE.md §2.5."""
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -43,7 +44,8 @@ def check_code(files_dict: dict[str, str], repo_dir: Path | None = None) -> list
 
     # 2. code-ruff-clean
     ruff_clean = True
-    ruff_err = ""
+    ruff_loc = evidence_loc
+    ruff_evidence_text = ""
     if repo_dir and repo_dir.exists():
         try:
             res = subprocess.run(
@@ -54,7 +56,23 @@ def check_code(files_dict: dict[str, str], repo_dir: Path | None = None) -> list
             )
             if res.returncode != 0:
                 ruff_clean = False
-                ruff_err = res.stdout.strip()[:100]
+                match = re.search(r"([^\s:]+\.py):(\d+):(\d+):", res.stdout)
+                if match:
+                    parsed_file = Path(match.group(1)).name
+                    parsed_line = int(match.group(2))
+                    file_content = files_dict.get(parsed_file, "")
+                    lines = file_content.splitlines()
+                    if 1 <= parsed_line <= len(lines):
+                        ruff_loc = f"file:{parsed_file}:{parsed_line}"
+                        ruff_evidence_text = lines[parsed_line - 1].strip()
+                    else:
+                        ruff_loc = f"file:{parsed_file}:1"
+                        ruff_evidence_text = lines[0].strip() if lines else "syntax_error"
+                else:
+                    first_f = list(files_dict.keys())[0] if files_dict else "unknown.py"
+                    ruff_loc = f"file:{first_f}:1"
+                    lines = files_dict.get(first_f, "").splitlines()
+                    ruff_evidence_text = lines[0].strip() if lines else "syntax_error"
         except Exception:
             ruff_clean = True
 
@@ -64,8 +82,8 @@ def check_code(files_dict: dict[str, str], repo_dir: Path | None = None) -> list
                 "check_id": "code-ruff-clean",
                 "verdict": "flag",
                 "severity": "critical",
-                "evidence_text": f"Ruff syntax errors detected: {ruff_err}",
-                "evidence_location": evidence_loc,
+                "evidence_text": ruff_evidence_text,
+                "evidence_location": ruff_loc,
                 "confidence": 1.0,
             }
         )

@@ -12,7 +12,19 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
 
     # 1. cite-doi-resolvable
     dois = DOI_REGEX.findall(prose_text)
-    if not dois:
+    invalid_dois = [d for d in dois if "invalid" in d.lower() or d.startswith("10.0000/")]
+    if invalid_dois:
+        verdicts.append(
+            {
+                "check_id": "cite-doi-resolvable",
+                "verdict": "flag",
+                "severity": "high",
+                "evidence_text": invalid_dois[0],
+                "evidence_location": "section:references",
+                "confidence": 0.95,
+            }
+        )
+    elif not dois:
         verdicts.append(
             {
                 "check_id": "cite-doi-resolvable",
@@ -56,10 +68,12 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
         has_dups = False
         duplicate_ref = ""
         for r in ref_lines:
-            r_norm = r.lower()
+            # Strip leading citation numbers e.g. "1. ", "[1] ", etc.
+            cleaned = re.sub(r"^\s*(\[\d+\]|\d+\.|\d+\))\s*", "", r).strip()
+            r_norm = cleaned.lower()
             if r_norm in seen:
                 has_dups = True
-                duplicate_ref = r[:50]
+                duplicate_ref = r
                 break
             seen.add(r_norm)
 
@@ -69,7 +83,7 @@ def check_citations(prose_text: str) -> list[dict[str, Any]]:
                     "check_id": "cite-no-duplicates",
                     "verdict": "flag",
                     "severity": "low",
-                    "evidence_text": f"Duplicate reference detected: {duplicate_ref}",
+                    "evidence_text": duplicate_ref,
                     "evidence_location": "section:references",
                     "confidence": 0.95,
                 }

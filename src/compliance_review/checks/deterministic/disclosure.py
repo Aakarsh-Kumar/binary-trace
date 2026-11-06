@@ -1,5 +1,6 @@
 """Deterministic Responsible-AI disclosure checks conforming to ARCHITECTURE.md §3."""
 
+import re
 from typing import Any
 
 KNOWN_DISCLOSURE_HEADINGS = ["disclosure", "ai use", "responsible ai", "ai assistance"]
@@ -57,6 +58,24 @@ def check_disclosure(prose_text: str, has_disclosure_file: bool = False) -> list
         }
     )
 
+    # Extract verbatim disclosure sample for evidence grounding
+    disc_sample = ""
+    for h in KNOWN_DISCLOSURE_HEADINGS:
+        pos = text_lower.find(h)
+        if pos != -1:
+            disc_sample = prose_text[pos : pos + 120].strip()
+            break
+    if not disc_sample:
+        disc_sample = prose_text[:100].strip()
+
+    is_negative_disclosure = bool(
+        re.search(r"\bno\s+(?:generative\s+)?ai\b", text_lower)
+        or "did not use" in text_lower
+        or "no ai" in text_lower
+        or "not used" in text_lower
+        or "without generative ai" in text_lower
+    )
+
     # 2. rai-tool-named
     tools_found = [t for t in KNOWN_AI_TOOLS if t in text_lower]
     if tools_found:
@@ -72,7 +91,7 @@ def check_disclosure(prose_text: str, has_disclosure_file: bool = False) -> list
         )
     else:
         # Check if negative disclosure
-        if "did not use" in text_lower or "no ai" in text_lower:
+        if is_negative_disclosure:
             verdicts.append(
                 {
                     "check_id": "rai-tool-named",
@@ -89,7 +108,7 @@ def check_disclosure(prose_text: str, has_disclosure_file: bool = False) -> list
                     "check_id": "rai-tool-named",
                     "verdict": "flag",
                     "severity": "medium",
-                    "evidence_text": "Disclosure exists but does not name specific AI tools",
+                    "evidence_text": disc_sample,
                     "evidence_location": "section:disclosure",
                     "confidence": 0.90,
                 }
@@ -98,7 +117,7 @@ def check_disclosure(prose_text: str, has_disclosure_file: bool = False) -> list
     # 3. rai-task-named
     task_keywords = ["debugging", "writing", "drafting", "translating", "brainstorming", "editing"]
     tasks_found = [k for k in task_keywords if k in text_lower]
-    if tasks_found or "did not use" in text_lower or "no ai" in text_lower:
+    if tasks_found or is_negative_disclosure:
         tasks_desc = ", ".join(tasks_found) if tasks_found else "None"
         verdicts.append(
             {
@@ -116,7 +135,7 @@ def check_disclosure(prose_text: str, has_disclosure_file: bool = False) -> list
                 "check_id": "rai-task-named",
                 "verdict": "flag",
                 "severity": "medium",
-                "evidence_text": "AI tasks performed are not clearly articulated",
+                "evidence_text": disc_sample,
                 "evidence_location": "section:disclosure",
                 "confidence": 0.85,
             }

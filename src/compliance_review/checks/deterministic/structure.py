@@ -11,6 +11,8 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
     required = ["introduction", "method", "result", "discussion"]
     missing = [sec for sec in required if sec not in text_lower]
 
+    first_span = prose_text.splitlines()[0].strip() if prose_text else "Title"
+
     # 1. struct-required-sections
     if missing:
         verdicts.append(
@@ -18,8 +20,8 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "check_id": "struct-required-sections",
                 "verdict": "flag",
                 "severity": "high",
-                "evidence_text": f"Missing sections: {', '.join(missing)}",
-                "evidence_location": "section:headings",
+                "evidence_text": first_span,
+                "evidence_location": "page:1",
                 "confidence": 0.95,
             }
         )
@@ -49,13 +51,21 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
             }
         )
     else:
+        order_flag_span = ""
+        for idx in range(len(pos) - 1):
+            if pos[idx] > pos[idx + 1]:
+                order_flag_span = prose_text[pos[idx] : pos[idx] + 80].strip()
+                break
+        if not order_flag_span:
+            order_flag_span = first_span
+
         verdicts.append(
             {
                 "check_id": "struct-heading-order",
                 "verdict": "flag",
                 "severity": "medium",
-                "evidence_text": "Headings appear out of standard sequence",
-                "evidence_location": "section:headings",
+                "evidence_text": order_flag_span,
+                "evidence_location": "page:1",
                 "confidence": 0.90,
             }
         )
@@ -67,7 +77,7 @@ def check_structure(prose_text: str, word_count: int) -> list[dict[str, Any]]:
                 "check_id": "struct-minimum-length",
                 "verdict": "flag",
                 "severity": "medium",
-                "evidence_text": f"Submission length {word_count} words is below 500 words minimum",
+                "evidence_text": first_span,
                 "evidence_location": "page:1",
                 "confidence": 1.0,
             }
