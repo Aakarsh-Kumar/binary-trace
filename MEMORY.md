@@ -360,6 +360,26 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: None (frozen verifier invariant strictly upheld)
 - Reversible: no
 
+### D-018: Pre-verifier vs post-verifier precision and recall views
+- Date: 2026-11-06 · Decided by: human:arch
+- Decision: Add pre_verifier_precision (true flags ÷ all flags emitted before verification) and pre_verifier_recall (true flags emitted before verification ÷ gold issues) alongside post-verifier metrics in PRD.md §6.2 and ARCHITECTURE.md §6.5.
+- Context: P1.5 showed acceptance rose 27% → 80%; without the pre-verifier view, the evaluation cannot distinguish "model capable, verifier strict" from "model not capable".
+- Documents amended: PRD.md §6.2, ARCHITECTURE.md §6.5
+- Reversible: no
+
+### D-019: Tag check_source on ModelVerdict and checklist_verdicts table
+- Date: 2026-11-06 · Decided by: human:arch
+- Decision: ModelVerdict schema and checklist_verdicts DB table gain check_source: Literal["deterministic", "model"].
+- Context: P1.5 showed deterministic checks need their own evidence-grounding (commit 8170240); without tagging, P2 cannot compute deterministic-only precision separately.
+- Documents amended: ARCHITECTURE.md §5.3
+- Reversible: no
+
+### D-020: Pre vs Post Verifier view in dashboard Metrics page
+- Date: 2026-11-06 · Decided by: human:arch
+- Decision: Dashboard Metrics page gains a "Pre vs Post Verifier" comparison view (read-only).
+- Documents amended: ARCHITECTURE.md §10.3
+- Reversible: yes
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)

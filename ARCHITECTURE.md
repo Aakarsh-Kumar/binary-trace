@@ -412,6 +412,7 @@ class ModelVerdict(BaseModel):
     evidence_text: str | None
     evidence_location: str | None
     confidence: float = Field(ge=0.0, le=1.0)
+    check_source: Literal["deterministic", "model"] = "model"
 
 class ModelOutput(BaseModel):
     capability: Capability
@@ -469,6 +470,14 @@ Every `retrieval_events.candidates` row includes **all** versions above `MIN_CAN
 ```
 HSR@K = count(queries where any candidate has eval_status in {draft, deprecated} and score >= MIN_CANDIDATE_SCORE) / count(queries)
 ```
+
+### 6.5 Pre-verifier vs. Post-verifier metrics (D-018)
+
+`metrics/compute.py` computes two views for precision and recall:
+- `pre_verifier_precision`: true flags ÷ all flags emitted BEFORE evidence verification
+- `pre_verifier_recall`: true flags emitted BEFORE evidence verification ÷ all true issues in gold labels
+
+Both are reported alongside post-verifier metrics to distinguish whether unverified flags result from model deficiency or verifier strictness.
 
 ## 7. Evidence Verifier (FROZEN — do not modify without PRD amendment)
 
@@ -575,7 +584,15 @@ Exit codes: `0` success · `1` validation/ingestion · `2` runtime · `3` invari
 6. **Unsupported (not shown to student)** — collapsed
 7. **Audit footer** — model tag + digest, skill versions, prompt hashes
 
-### 10.3 Forbidden in dashboard code
+### 10.3 Metrics page layout (D-020)
+
+1. **Header & Capability Filter** — capability selector, overall metrics summary
+2. **Pre vs Post Verifier Comparison View (Read-only)** — side-by-side comparison table of `pre_verifier_precision` vs `post_verifier_precision` and `pre_verifier_recall` vs `post_verifier_recall` per capability and check
+3. **Checklist Performance Table** — per-check post-verifier precision, recall, clean-submission FFR, and consistency
+4. **Confusion Matrices** — 2x2 confusion matrix display per check
+5. **Retrieval & System Telemetry** — HSR@K, execution error rate, latency percentiles
+
+### 10.4 Forbidden in dashboard code
 
 - `st.write()` for anything except debug to hidden expander
 - Direct SQL (all reads through `db/repository.py`)

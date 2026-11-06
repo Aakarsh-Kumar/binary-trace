@@ -129,8 +129,10 @@ Every metric below is measured at the phase gate indicated. No metric is a "nice
 
 | Metric | Definition | Target |
 |---|---|---|
-| Per-check precision | True flags / all flags raised | ≥ 0.85 |
-| Per-check recall | True flags / all true issues | ≥ 0.80 |
+| Per-check precision | True flags / all flags raised (post-verifier) | ≥ 0.85 |
+| Per-check recall | True flags / all true issues (post-verifier) | ≥ 0.80 |
+| Pre-verifier precision (D-018) | True flags ÷ all flags emitted BEFORE evidence verification | Reported alongside post-verifier |
+| Pre-verifier recall (D-018) | True flags emitted BEFORE evidence verification ÷ all true issues | Reported alongside post-verifier |
 | **False-flag rate (FFR)** per check | Flags raised on clean submissions ÷ (flags raised on clean + flags raised on dirty) | **< 0.10 before any skill is promoted to `active`** |
 | Execution error rate | Executions with `status = schema_error` after retry ÷ total executions | < 0.05 |
 
