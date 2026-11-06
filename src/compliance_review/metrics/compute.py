@@ -70,12 +70,12 @@ def compute_metrics(
         active_conn = conn
 
     try:
-        # Join checklist_verdicts with skill_executions to get run_index
+        # Join checklist_verdicts with skill_executions to get submission_id and run_index
         stmt = (
             select(
-                checklist_verdicts.c.submission_id,
+                skill_executions.c.submission_id,
                 checklist_verdicts.c.check_id,
-                checklist_verdicts.c.skill_capability,
+                skill_executions.c.skill_capability,
                 checklist_verdicts.c.verdict,
                 checklist_verdicts.c.evidence_text,
                 checklist_verdicts.c.check_source,
@@ -87,7 +87,7 @@ def compute_metrics(
                     checklist_verdicts.c.execution_id == skill_executions.c.id,
                 )
             )
-            .where(checklist_verdicts.c.submission_id.in_(submission_ids))
+            .where(skill_executions.c.submission_id.in_(submission_ids))
         )
         db_rows = active_conn.execute(stmt).fetchall()
     finally:

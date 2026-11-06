@@ -173,13 +173,88 @@ def review_submission(
 
 
 @app.command("metrics")
-def compute_metrics(
+def compute_metrics_cmd(
     labels: Path = typer.Option(..., help="Path to gold labels CSV"),
-    out: Path = typer.Option(..., help="Path to write metrics JSON"),
+    out: Path = typer.Option(..., help="Path to write metrics output (JSON and CSV)"),
 ) -> None:
     """Compute benchmark metrics against gold labels (US-35)."""
-    typer.echo("metrics is not implemented until P2", err=True)
-    sys.exit(3)
+    import csv
+    import json
+
+    from compliance_review.metrics.compute import compute_metrics
+
+    if not labels.exists():
+        typer.echo(f"Error: Labels file not found: {labels}", err=True)
+        sys.exit(1)
+
+    try:
+        results = compute_metrics(labels)
+
+        # Output JSON path and CSV path
+        if out.suffix.lower() == ".csv":
+            csv_path = out
+            json_path = out.with_suffix(".json")
+        else:
+            json_path = out
+            csv_path = out.with_suffix(".csv")
+
+        json_path.parent.mkdir(parents=True, exist_ok=True)
+        json_path.write_text(json.dumps(results, indent=2), encoding="utf-8")
+
+        # Write per-check CSV report
+        csv_rows: list[dict[str, Any]] = []
+        for cap, c_data in results.get("capabilities", {}).items():
+            for c_id, m in c_data.get("checks", {}).items():
+                post_cm = m.get("post_confusion_matrix_2x2", {})
+                csv_rows.append(
+                    {
+                        "capability": cap,
+                        "check_id": c_id,
+                        "sample_size": m.get("sample_size"),
+                        "gold_flags": m.get("gold_flags"),
+                        "pre_verifier_precision": m.get("pre_verifier_precision"),
+                        "pre_verifier_recall": m.get("pre_verifier_recall"),
+                        "post_verifier_precision": m.get("post_verifier_precision"),
+                        "post_verifier_recall": m.get("post_verifier_recall"),
+                        "post_verifier_ffr": m.get("post_verifier_ffr"),
+                        "consistency_agreement": m.get("consistency_agreement"),
+                        "consistency_jaccard": m.get("consistency_jaccard"),
+                        "tp": post_cm.get("tp"),
+                        "fp": post_cm.get("fp"),
+                        "tn": post_cm.get("tn"),
+                        "fn": post_cm.get("fn"),
+                    }
+                )
+
+        if csv_rows:
+            with csv_path.open("w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=list(csv_rows[0].keys()))
+                writer.writeheader()
+                writer.writerows(csv_rows)
+
+        summary = results.get("summary", {})
+        typer.echo("=== Compliance Review Metrics Summary ===")
+        typer.echo(f"Total Labels: {summary.get('total_labels')}")
+        typer.echo(f"Submissions Evaluated: {summary.get('total_submissions')}")
+        post_p = summary.get("overall_post_verifier_precision")
+        post_r = summary.get("overall_post_verifier_recall")
+        pre_p = summary.get("overall_pre_verifier_precision")
+        pre_r = summary.get("overall_pre_verifier_recall")
+        ffr = summary.get("overall_post_verifier_ffr")
+        agree = summary.get("overall_consistency_agreement")
+        typer.echo(f"Overall Post-Verifier Precision: {post_p}")
+        typer.echo(f"Overall Post-Verifier Recall: {post_r}")
+        typer.echo(f"Overall Pre-Verifier Precision: {pre_p}")
+        typer.echo(f"Overall Pre-Verifier Recall: {pre_r}")
+        typer.echo(f"Overall False-Flag Rate (FFR): {ffr}")
+        typer.echo(f"Overall Verdict Agreement: {agree}")
+        typer.echo(f"Metrics written to {json_path} and {csv_path}")
+    except (FileNotFoundError, ValueError, KeyError) as exc:
+        typer.echo(f"Validation/Input error: {exc}", err=True)
+        sys.exit(1)
+    except Exception as exc:
+        typer.echo(f"Runtime error: {exc}", err=True)
+        sys.exit(2)
 
 
 @audit_app.command("export")
