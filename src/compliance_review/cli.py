@@ -51,10 +51,12 @@ app = typer.Typer(help="Grounded, local-first skill-retrieved compliance review.
 skills_app = typer.Typer(help="Manage and validate skills library.")
 audit_app = typer.Typer(help="Audit log commands.")
 index_app = typer.Typer(help="Vector index operations.")
+reviewer_app = typer.Typer(help="Reviewer feedback operations.")
 
 app.add_typer(skills_app, name="skills")
 app.add_typer(audit_app, name="audit")
 app.add_typer(index_app, name="index")
+app.add_typer(reviewer_app, name="reviewer")
 
 
 @skills_app.command("validate")
@@ -282,6 +284,65 @@ def rebuild_index(
         typer.echo(f"Built FAISS index with {count} skill versions at {index_path}")
     except Exception as exc:
         typer.echo(f"Error rebuilding index: {exc}", err=True)
+        sys.exit(2)
+
+
+@reviewer_app.command("feedback")
+def reviewer_feedback_cmd(
+    submission_id: int = typer.Option(..., "--submission-id", help="Submission ID"),
+    verdict_id: int | None = typer.Option(None, "--verdict-id", help="Checklist verdict ID"),
+    reviewer_id: str = typer.Option(..., "--reviewer-id", help="Reviewer identifier"),
+    action: str = typer.Option(
+        ..., "--action", help="approve | override | request_rerun | escalate"
+    ),
+    reason_code: str | None = typer.Option(
+        None,
+        "--reason-code",
+        help=(
+            "evidence_insufficient | check_not_applicable | model_misread | "
+            "policy_exception | severity_mismatch | other"
+        ),
+    ),
+    comment: str | None = typer.Option(None, "--comment", help="Reviewer comment"),
+) -> None:
+    """Record reviewer feedback on a submission or verdict (US-31/32)."""
+    valid_actions = {"approve", "override", "request_rerun", "escalate"}
+    if action not in valid_actions:
+        typer.echo(f"Invalid action '{action}'. Must be one of {valid_actions}", err=True)
+        sys.exit(1)
+
+    valid_reasons = {
+        "evidence_insufficient",
+        "check_not_applicable",
+        "model_misread",
+        "policy_exception",
+        "severity_mismatch",
+        "other",
+    }
+    if reason_code is not None and reason_code not in valid_reasons:
+        typer.echo(
+            f"Invalid reason_code '{reason_code}'. Must be one of {valid_reasons}",
+            err=True,
+        )
+        sys.exit(1)
+
+    from compliance_review.db.repository import record_reviewer_feedback
+
+    try:
+        feedback_id = record_reviewer_feedback(
+            submission_id=submission_id,
+            verdict_id=verdict_id,
+            reviewer_id=reviewer_id,
+            action=action,
+            reason_code=reason_code,
+            comment=comment,
+        )
+        typer.echo(
+            f"Recorded reviewer feedback id={feedback_id} action={action} "
+            f"submission={submission_id} reviewer={reviewer_id}"
+        )
+    except Exception as exc:
+        typer.echo(f"Error recording reviewer feedback: {exc}", err=True)
         sys.exit(2)
 
 

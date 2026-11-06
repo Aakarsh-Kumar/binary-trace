@@ -10,6 +10,7 @@ from compliance_review.db.tables import (
     checklist_verdicts,
     evidence_verifications,
     retrieval_events,
+    reviewer_feedback,
     skill_executions,
     submissions,
 )
@@ -376,3 +377,49 @@ def record_skill_execution_run(
             return execution_id
     except Exception as exc:
         raise DatabaseError(f"Failed to record skill execution run: {exc}") from exc
+
+
+def record_reviewer_feedback(
+    submission_id: int,
+    verdict_id: int | None,
+    reviewer_id: str,
+    action: str,
+    reason_code: str | None = None,
+    comment: str | None = None,
+) -> int:
+    """Record reviewer feedback and append an audit_log entry atomically (US-31/32)."""
+    engine = get_engine()
+    try:
+        with engine.begin() as conn:
+            stmt = reviewer_feedback.insert().values(
+                submission_id=submission_id,
+                verdict_id=verdict_id,
+                reviewer_id=reviewer_id,
+                action=action,
+                reason_code=reason_code,
+                comment=comment,
+            )
+            result = conn.execute(stmt)
+            pk = result.inserted_primary_key
+            feedback_id = int(pk[0]) if pk is not None else 0
+
+            append_audit(
+                conn,
+                actor=reviewer_id,
+                action="create_reviewer_feedback",
+                table_name="reviewer_feedback",
+                row_id=feedback_id,
+                before_json=None,
+                after_json={
+                    "id": feedback_id,
+                    "submission_id": submission_id,
+                    "verdict_id": verdict_id,
+                    "reviewer_id": reviewer_id,
+                    "action": action,
+                    "reason_code": reason_code,
+                    "comment": comment,
+                },
+            )
+            return feedback_id
+    except Exception as exc:
+        raise DatabaseError(f"Failed to record reviewer feedback: {exc}") from exc
