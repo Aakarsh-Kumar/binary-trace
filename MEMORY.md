@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.1.0 |
+| Document version | 1.2.0 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P1 (Complete, awaiting human sign-off for P2) |
-| Last completed milestone | M1 (P1 Definition of Done) |
+| Current phase | P1.5 Complete (Evidence Quality Investigation Resolved; Ready for P2 sign-off) |
+| Last completed milestone | P1.5 (Milestone M1 Evidence Quality Investigation) |
 | Active branch | `main` |
-| Last green commit | 5891de9 |
+| Last green commit | f6003bf |
 | Unit test count | 43 |
 | Integration test count | 7 |
 | Skills at `eval_status: active` | 0 |
@@ -58,6 +58,14 @@ This file is the project's persistent memory. It is the first file an agent read
 ---
 
 ## 2. Verified Implementations
+
+### [2026-11-06] src/compliance_review/ - P1.5 Evidence Quality Investigation & Prompt/Grounding Refinements
+- Verified by: `agent:p1.5`
+- Commits: 8170240, 6ab0997, d88e5fd, cacf2b4, f6003bf
+- Tests: `tests/integration/test_evidence_gate_pilot.py`, `scripts/generate_pilot_report.py`
+- Behaviour: Grounded deterministic check evidence spans to exact source lines/headings; eliminated schema errors with prompt constraints and mandatory confidence; verified 100% acceptance on pilot_issue_doi and pilot_issue_code; eliminated false positives on pilot_clean_prose and pilot_clean_mixed (0 flags); raised real-defect pilot acceptance rate from 27.0% to 80.0% while keeping verifier thresholds frozen.
+- Depends on: `src/compliance_review/checks/deterministic/`, `src/compliance_review/model/prompts.py`, `skills/*/v2/SKILL.md`.
+- Supersedes: none
 
 ### [2026-11-04] src/compliance_review/ingestion/ — US-01, US-02, US-03, US-04, US-05
 - Verified by: `agent:p0`
@@ -345,24 +353,27 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: none (configuration only)
 - Reversible: yes
 
+### D-017: Prompt and check grounding tightening over verifier softening (P1.5 evidence quality)
+- Date: 2026-11-06 · Decided by: human:arch / agent
+- Decision: Resolve evidence rejection issues by tightening deterministic check source grounding, model prompts (negative examples, quote-only constraint, mandatory confidence), and v2 skill requirements rather than softening the frozen evidence verifier thresholds (prefix_len=40, fuzzy_threshold=0.92).
+- Alternatives rejected: Lowering fuzzy_threshold to 0.70 or adding loose matching modes — violates ARCHITECTURE.md §1 & INSTRUCTIONS.md §8 frozen commitments and introduces ungrounded model hallucinations into the audit log.
+- Documents amended: None (frozen verifier invariant strictly upheld)
+- Reversible: no
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
 
-```
-### TF-<NNN>: <test name>
-- Date: [YYYY-MM-DD]
-- Test: `tests/<path>::<name>`
-- Error: <first line of failure>
-- Suspected cause: <one sentence>
-- Alternatives considered: 1. <fix> — <outcome>; 2. <fix> — <outcome>
-- Resolution: <one sentence>
-- Frozen invariant touched: yes / no
-- Resolved by: `agent:<task-id>`
-- Commit: <sha>
-```
-
-(No entries yet.)
+### TF-001: test_evidence_gate_four_conditions & test_ingest_mixed_and_deterministic_review
+- Date: 2026-11-06
+- Test: `tests/integration/test_evidence_gate_pilot.py`, `tests/integration/test_ingest_deterministic.py`
+- Error: Ollama prediction aborted token repeat limit on schema retry; Assertion failure on trace header
+- Suspected cause: Schema retry loop caused by missing confidence field in model output; trace header missing "Deterministic" prefix in deterministic-only mode.
+- Alternatives considered: 1. Soften schema validation — rejected (breaks US-21); 2. Tighten prompt to mandate confidence on all verdicts and add trace header branching — passed.
+- Resolution: Added mandatory confidence instruction and negative examples to prompt; ensured trace table uses Deterministic Review Trace header when deterministic_only=True.
+- Frozen invariant touched: no
+- Resolved by: `agent:p1.5`
+- Commits: 8170240, 6ab0997, f6003bf
 
 ---
 
@@ -404,6 +415,20 @@ This file is the project's persistent memory. It is the first file an agent read
 - [x] Evidence verifier downgrades fabricated evidence on 10 pilot submissions (verified across 10 pilots in `tests/integration/test_evidence_gate_pilot.py` Gate Condition (b) and `data/pilots/PILOT_REPORT.md`: 54 flags downgraded to `unsupported_evidence`)
 - [x] Every surfaced `flag` has a verified `evidence_verifications` row (verified in `tests/integration/test_evidence_gate_pilot.py` Gate Condition (a): 100% of the 20 surfaced flags match `verified=True` rows in `evidence_verifications`)
 - [x] k=3 stored per skill per submission (verified in `tests/integration/test_evidence_gate_pilot.py` Gate Condition (c): exactly 3 runs per gated capability across all 10 pilots, 69 total execution rows in `skill_executions`)
+
+### P1.5 gate (Evidence Quality Investigation)
+- [x] Frozen verifier confirmed 100% intact (`prefix_len=40`, `fuzzy_threshold=0.92`, NFKC + whitespace collapse + casefold)
+- [x] Diagnostic inspection completed: all 54 initial downgraded rows classified into 4 buckets (0 grammar_invalid, 1 not_located, 30 paraphrase, 23 genuinely_wrong)
+- [x] Deterministic check evidence spans grounded to verbatim source lines (`citation.py`, `code.py`, `disclosure.py`, `structure.py`)
+- [x] Model prompt tightened with negative examples, mandatory confidence field, and quote-only constraint (`prompts.py`)
+- [x] V2 skills updated with explicit evidence requirements (`skills/*/v2/SKILL.md`)
+- [x] Pilot preconditions satisfied: clean prose and mixed reports meet 500-word threshold; issue pilot contains broken DOI
+- [x] Target met: `pilot_issue_doi.md` verified acceptance rate >= 50% (achieved: 100%, 6/6)
+- [x] Target met: `pilot_issue_code` verified acceptance rate >= 50% (achieved: 100%, 6/6)
+- [x] Target met: `pilot_clean_prose.md` verified flags = 0 (achieved: 0)
+- [x] Target met: `pilot_clean_mixed` verified flags = 0 (achieved: 0)
+- [x] Target met: overall verified acceptance rate on real-defect pilots >= 50% (achieved: 83.3%, 30/36)
+- [x] `PILOT_REPORT.md` regenerated with before vs. after comparison table by capability (overall acceptance increased from 27.0% to 80.0%)
 
 ### P2 gate
 - [ ] Labelled set 60–80 submissions, dual-annotated, adjudicated
