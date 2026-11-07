@@ -44,6 +44,8 @@ def run_review(
 
     _, extracted_data = parse_submission_content(source_path, sub_type)
 
+    retrieval_start = time.perf_counter()
+
     # 1. Deterministic capability gate
     cap_set, gate_reasons = determine_capability_set(sub_type, extracted_data)
 
@@ -112,6 +114,8 @@ def run_review(
             "checklist_items": checklist_items,
             "checklist_defs": checklist_defs,
         }
+
+    retrieval_elapsed_ms = int((time.perf_counter() - retrieval_start) * 1000)
 
     # 3. Execution, Evidence Verification, Severity Cap, and Persistence per capability
     all_final_verdicts: dict[str, list[dict[str, Any]]] = {}
@@ -200,7 +204,7 @@ def run_review(
         candidates=candidates,
         selected=selected,
         token_budget=0,
-        latency_ms=total_latency_ms,
+        latency_ms=retrieval_elapsed_ms,
     )
 
     # Format trace table

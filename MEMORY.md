@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.6 |
+| Document version | 1.2.7 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P3 (Milestone M3 Retrieval Evaluation - Roadblock Recorded) |
 | Last completed milestone | P2-eval (Milestone M2 evaluation on audit-corrected labels) |
 | Active branch | `main` |
-| Last green commit | 77d2fd7 |
-| Unit test count | 59 |
+| Last green commit | dececce |
+| Unit test count | 60 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -223,11 +223,19 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] src/compliance_review/retrieval/capability_gate.py, ingestion/orchestrator.py — US-13, D-028
 - Verified by: `agent:p3-fix`
-- Commit: pending
+- Commit: dececce
 - Tests: `tests/unit/test_gate_purity.py`
 - Behaviour: Aligns prose gating rules with mixed gating rules per D-028: report-structure requires >= 500 words, rai-disclosure requires disclosure present, citation-integrity requires references present. Mixed ingestion prefers primary non-disclosure prose files and scans all prose files for bibliography signals.
 - Depends on: pure python, standard library only.
 - Supersedes: US-13 (2026-11-04)
+
+### [2026-11-08] src/compliance_review/harness/orchestrator.py — US-17, D-029
+- Verified by: `agent:p3-fix`
+- Commit: pending
+- Tests: `tests/unit/test_orchestrator_latency.py`
+- Behaviour: Measures isolated capability gate + FAISS selection time only in `retrieval_events.latency_ms`, strictly excluding model execution runs.
+- Depends on: `time.perf_counter`, `src/compliance_review/retrieval/`.
+- Supersedes: US-17 (2026-11-05)
 
 ---
 
