@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.10 |
+| Document version | 1.2.6 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4-hotfix in progress (manual streamlit verification completed) |
+| Current phase | P4-code gate closed — ready for P4-pilot |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 31a8da1 |
+| Last green commit | 89027a8 |
 | Unit test count | 64 |
 | Integration test count | 16 |
 | Skills at `eval_status: active` | 0 |
@@ -580,6 +580,16 @@ This file is the project's persistent memory. It is the first file an agent read
 - Resolved by: `agent:p1.5`
 - Commits: 8170240, 6ab0997, f6003bf
 
+### TF-002: manual streamlit render of 01_submission.py
+- Date: 2026-11-08
+- Test: manual streamlit render of 01_submission.py
+- Error: ImportError: pyarrow requires NumPy 2.0 or newer, found 1.26.4
+- Suspected cause: st.dataframe triggers pyarrow; venv has numpy 1.26.4 (pinned by faiss-cpu / sentence-transformers)
+- Resolution: replaced st.dataframe with st.table (no pyarrow dep)
+- Frozen invariant touched: no
+- Resolved by: `agent:p4-hotfix`
+- Commits: 9eedabd, 8819c32, 31a8da1, 4456c12
+
 ---
 
 ## 8. Schema Changes (append-only)
@@ -648,7 +658,7 @@ This file is the project's persistent memory. It is the first file an agent read
 - [x] Latency ≤ 1500 ms (p50 = 48.5 ms achieved)
 
 ### P4 gate
-- [x] Streamlit Submission page renders all seven frozen sections
+- [x] Streamlit Submission page renders all seven frozen sections (verify with eval_mixed_12 - see TF-002 for fix that made this true)
 - [ ] Two reviewers complete 20 submissions · reason codes ≥ 90 % · rework time measured
 
 ### P5 gate
