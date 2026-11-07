@@ -120,7 +120,10 @@ def render_header(submission: dict[str, Any] | None) -> None:
 # ────────────────────────────────────────────────────────────────────────
 # SECTION 2 — RETRIEVAL TRACE
 # ────────────────────────────────────────────────────────────────────────
-def render_retrieval_trace(retrieval_event: dict[str, Any] | None) -> None:
+def render_retrieval_trace(
+    retrieval_event: dict[str, Any] | None,
+    submission: dict[str, Any] | None = None,
+) -> None:
     """Section 2: Retrieval Trace."""
     st.subheader("2. Retrieval Trace")
     if retrieval_event is None:
@@ -133,7 +136,13 @@ def render_retrieval_trace(retrieval_event: dict[str, Any] | None) -> None:
     selected = json.loads(selected_raw) if isinstance(selected_raw, str) else selected_raw
     latency_ms = retrieval_event.get("latency_ms", 0)
 
-    st.markdown(f"**Retrieval Latency:** `{latency_ms} ms` (FAISS version index query)")
+    ext_id = str(submission.get("external_id", "")) if submission else ""
+    if ext_id.startswith("test-pilot-") or "pilot_" in ext_id:
+        st.caption(
+            "Retrieval latency: — (pilot submission; latency not measured at evaluation time)"
+        )
+    else:
+        st.metric("Retrieval latency", f"{latency_ms} ms")
 
     st.markdown("##### Capability Gates")
     if not cap_set:
@@ -462,7 +471,7 @@ def render_submission_page(external_id: str | None = None) -> None:
     render_header(submission)
 
     # 2. Retrieval Trace
-    render_retrieval_trace(retrieval_event)
+    render_retrieval_trace(retrieval_event, submission)
 
     # 3. Findings (verdict == 'flag' AND verified == True)
     verified_findings: list[dict[str, Any]] = []
