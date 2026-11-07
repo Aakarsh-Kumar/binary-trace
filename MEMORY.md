@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P4-code closed / Ready for P4-pilot |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | ab74d6b |
+| Last green commit | 21a426f |
 | Unit test count | 64 |
 | Integration test count | 12 |
 | Skills at `eval_status: active` | 0 |
@@ -295,7 +295,7 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] scripts/run_dashboard.py, README.md — US-29
 - Verified by: `agent:p4`
-- Commit: pending
+- Commit: 21a426f
 - Tests: static code inspection, README instructions check
 - Behaviour: Adds convenient launcher script for running the Streamlit dashboard and documents run commands in README.md.
 - Depends on: `src/compliance_review/dashboard/app.py`, `streamlit`.
