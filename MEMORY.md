@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P4-code closed / Ready for P4-pilot |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 21a426f |
+| Last green commit | b138b94 |
 | Unit test count | 64 |
 | Integration test count | 12 |
 | Skills at `eval_status: active` | 0 |
