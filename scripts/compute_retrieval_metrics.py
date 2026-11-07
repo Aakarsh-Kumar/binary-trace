@@ -324,6 +324,13 @@ def calculate_retrieval_metrics(
             "latency_p95_ms": round(p95, 1),
             "latency_p99_ms": round(p99, 1),
             "latency_max_ms": round(max_lat, 1),
+            "total_intersect": total_intersect_count,
+            "total_gold_caps": total_gold_caps_count,
+            "total_p1_matches": total_p1_matches,
+            "total_over_retrieved": total_over_retrieved,
+            "total_selected_caps": total_selected_caps_count,
+            "risky_queries_count": risky_queries_count,
+            "queries_count": queries_count,
         },
         "per_capability": per_cap_results,
         "latency_distribution": {
@@ -399,34 +406,86 @@ def generate_markdown_report(metrics_data: dict[str, Any]) -> str:
     t3_text = "\n".join(t3_lines)
     t4_text = "\n".join(t4_lines)
 
+    rec = summary["capability_recall"]
+    p1 = summary["version_precision@1"]
+    over = summary["over_retrieval_rate"]
+    hsr = summary["HSR@K"]
+    p50 = lat_dist["p50"]
+    max_lat = lat_dist["max"]
+
+    rec_status = "PASS" if rec >= 0.90 else "MISSED TARGET"
+    p1_status = "PASS" if p1 >= 0.90 else "MISSED TARGET"
+    over_status = "PASS" if over < 0.20 else "MISSED TARGET"
+    lat_status = "PASS" if p50 <= 1500.0 else "MISSED TARGET"
+
+    tot_inter = summary.get("total_intersect", 0)
+    tot_gold = summary.get("total_gold_caps", 0)
+    tot_p1 = summary.get("total_p1_matches", 0)
+    tot_over = summary.get("total_over_retrieved", 0)
+    tot_sel = summary.get("total_selected_caps", 0)
+    rq_count = summary.get("risky_queries_count", 0)
+    q_count = summary.get("queries_count", 0)
+    rc_count = summary.get("risky_candidates_surfaced", 0)
+
     p1_note = (
-        "Breakdown: Perfect 1.0000 recall on `code-quality` and `rai-disclosure`. "
-        "Recall on `citation-integrity` was 0.7500 (30 / 40) because in 10 mixed submissions "
-        "(`eval_mixed_01, 03, 05, 07, 09, 11, 13, 15, 17, 19`), the ingestion parser evaluated "
-        "`DISCLOSURE.md` instead of `paper.md`, suppressing the references detector."
+        f"Breakdown: {tot_inter} of {tot_gold} gold capability instances "
+        f"retrieved. Per-capability breakdown shown in Table 2."
     )
-    over_note = (
-        "Mechanism: The deterministic capability gate in `capability_gate.py` unconditionally "
-        "enabled `report-structure` on all 20 prose submissions regardless of word count, whereas "
-        "ARCHITECTURE §6.2 specifies that structural conformance requires `word_count >= 500`. "
-        "Since all 20 prose submissions in the evaluation corpus contain fewer than 500 words "
-        "(50–187 words), `report-structure` was over-retrieved 20 times. Additionally, "
-        "`rai-disclosure` was unconditionally enabled on 8 prose submissions that lacked an AI "
-        "disclosure section."
-    )
+
+    if over < 0.20:
+        over_target_line = (
+            f"- Achieved: **{over:.4f}** ({tot_over} over-retrievals / "
+            f"{tot_sel} selected capabilities). **{over_status}**."
+        )
+        over_note = (
+            "Mechanism: Resolved via D-028. Aligning prose gating rules with mixed gating rules "
+            "(report-structure requires >= 500 words, rai-disclosure requires disclosure present) "
+            "eliminated false positive selections on short evaluation submissions."
+        )
+    else:
+        over_target_line = (
+            f"- Achieved: **{over:.4f}** ({tot_over} over-retrievals / "
+            f"{tot_sel} selected capabilities). **MISSED TARGET** ({over:.4f} >= 0.20)."
+        )
+        over_note = (
+            "Mechanism: The deterministic capability gate in `capability_gate.py` unconditionally "
+            "enabled `report-structure` on all 20 prose submissions regardless of word count, "
+            "whereas ARCHITECTURE §6.2 specifies that structural conformance requires "
+            "`word_count >= 500`. Since all 20 prose submissions in the evaluation corpus "
+            "contain fewer than 500 words (50–187 words), `report-structure` was "
+            "over-retrieved 20 times. Additionally, `rai-disclosure` was unconditionally "
+            "enabled on 8 prose submissions that lacked an AI disclosure section."
+        )
+
     hsr_note = (
-        "- Measured: **0.6333** across all queries (38 of 60 queries surfaced at least one "
-        "candidate with score $\\ge 0.30$ and status `draft` or `deprecated`).\n"
-        "- Total risky candidates surfaced: **58** (primarily v1 draft skills appearing in "
-        "FAISS candidate pools)."
+        f"- Measured: **{hsr:.4f}** across all queries ({rq_count} of "
+        f"{q_count} queries surfaced at least one candidate with score "
+        f"$\\ge 0.30$ and status `draft` or `deprecated`).\n"
+        f"- Total risky candidates surfaced: **{rc_count}** "
+        f"(primarily v1 draft skills appearing in FAISS candidate pools)."
     )
-    lat_note = (
-        "Mechanism: During Phase P2 orchestrator runs, `retrieval_events.latency_ms` recorded "
-        "elapsed wall-clock time from the submission review entrypoint (`time.perf_counter() - "
-        "start_time`), capturing the cumulative duration of all $k=3$ LLM Ollama inference "
-        "executions across gated capabilities, rather than isolating FAISS vector lookup and "
-        "deterministic gate evaluation latency."
-    )
+
+    if p50 <= 1500.0:
+        lat_target_line = (
+            f"- Target: $p50 \\le 1500$ ms.\n"
+            f"- Observed $p50$: **{p50:.1f} ms** (max: {max_lat:.1f} ms). **{lat_status}**."
+        )
+        lat_note = (
+            "Mechanism: Resolved via D-029. Latency measurement isolates capability gate "
+            "and FAISS version selection elapsed time, excluding model execution."
+        )
+    else:
+        lat_target_line = (
+            f"- Target: $p50 \\le 1500$ ms.\n"
+            f"- Observed $p50$: **{p50:.1f} ms** (max: {max_lat:.1f} ms). **MISSED TARGET**."
+        )
+        lat_note = (
+            "Mechanism: During Phase P2 orchestrator runs, `retrieval_events.latency_ms` recorded "
+            "elapsed wall-clock time from the submission review entrypoint (`time.perf_counter() - "
+            "start_time`), capturing the cumulative duration of all $k=3$ LLM Ollama inference "
+            "executions across gated capabilities, rather than isolating FAISS vector lookup and "
+            "deterministic gate evaluation latency."
+        )
 
     policy_note = (
         "- **Gold Active Version Policy**: Gold active version is v2 by evaluation-time "
@@ -439,12 +498,7 @@ def generate_markdown_report(metrics_data: dict[str, Any]) -> str:
         "re-running model executions."
     )
 
-    over_target_line = (
-        "- Achieved: **0.2154** (28 over-retrievals / 130 selected capabilities). "
-        "**MISSED TARGET** ($0.2154 \\ge 0.20$)."
-    )
-
-    report = f"""# Retrieval Evaluation Report v1 (P3 Milestone M3)
+    report = f"""# Retrieval Evaluation Report (P3 Milestone M3)
 
 ## Policy & Invariants
 {policy_note}
@@ -479,26 +533,27 @@ def generate_markdown_report(metrics_data: dict[str, Any]) -> str:
 
 1. **Capability Recall**:
    - Target: $\\ge 0.90$.
-   - Achieved: **0.9107** (102 / 112 gold capability instances correctly retrieved). **PASS**.
+   - Achieved: **{rec:.4f}** ({tot_inter} / {tot_gold} gold instances retrieved). **{rec_status}**.
    - {p1_note}
 
 2. **Version-Level Precision@1**:
    - Target: $\\ge 0.90$.
-   - Achieved: **0.9107** (102 / 112 matches to gold active version `v2`). **PASS**.
+   - Achieved: **{p1:.4f}** ({tot_p1} / {tot_gold} matches to gold active version). **{p1_status}**.
 
 3. **Over-Retrieval Rate**:
    - Target: $< 0.20$.
-   - {over_target_line}
+   {over_target_line}
    - {over_note}
 
 4. **Same-Family Risk Exposure (HSR@K)**:
    {hsr_note}
 
 5. **Retrieval Latency**:
-   - Target: $p50 \\le 1500$ ms.
-   - Observed $p50$: **24,730.5 ms** (max: 38,686.0 ms). **MISSED TARGET**.
+   {lat_target_line}
    - {lat_note}
 """
+    return report
+    return report
     return report
 
 
@@ -555,9 +610,14 @@ def main(
                 re.candidates,
                 re.selected,
                 re.latency_ms
-            FROM retrieval_events re
+            FROM (
+                SELECT
+                    id, submission_id, capability_set, candidates, selected, latency_ms,
+                    ROW_NUMBER() OVER(PARTITION BY submission_id ORDER BY id DESC) as rn
+                FROM retrieval_events
+            ) re
             JOIN submissions s ON re.submission_id = s.id
-            WHERE s.external_id LIKE 'eval_%'
+            WHERE s.external_id LIKE 'eval_%' AND re.rn = 1
             ORDER BY s.id
         """)
         db_rows = active_conn.execute(query).fetchall()

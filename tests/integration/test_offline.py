@@ -20,7 +20,12 @@ def test_offline_execution_with_blocked_egress(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(socket, "create_connection", guarded_connect)
 
     # 1. Deterministic capability gate with network blocked
-    caps, reasons = determine_capability_set("prose", {"text": "offline text", "word_count": 2})
+    sample_prose = {
+        "text": "offline text\n\nReferences:\n10.1234/test",
+        "word_count": 5,
+        "references_present": True,
+    }
+    caps, reasons = determine_capability_set("prose", sample_prose)
     assert caps["citation-integrity"] is True
     assert caps["code-quality"] is False
 

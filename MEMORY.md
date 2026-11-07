@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.7 |
+| Document version | 1.2.8 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,17 +21,17 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P3 (Milestone M3 Retrieval Evaluation - Roadblock Recorded) |
-| Last completed milestone | P2-eval (Milestone M2 evaluation on audit-corrected labels) |
+| Current phase | P3 closed / Ready for P4 (Milestone M3 achieved) |
+| Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | dececce |
+| Last green commit | 8beb20f |
 | Unit test count | 60 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
 | Known failing tests | 0 |
-| Open roadblocks | 1 (RB-005) |
+| Open roadblocks | 0 |
 | Frozen invariants intact | yes |
 
 **Environment (recorded at P0 preflight 2026-11-04):**
@@ -231,25 +231,25 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] src/compliance_review/harness/orchestrator.py — US-17, D-029
 - Verified by: `agent:p3-fix`
-- Commit: pending
+- Commit: 8beb20f
 - Tests: `tests/unit/test_orchestrator_latency.py`
 - Behaviour: Measures isolated capability gate + FAISS selection time only in `retrieval_events.latency_ms`, strictly excluding model execution runs.
 - Depends on: `time.perf_counter`, `src/compliance_review/retrieval/`.
 - Supersedes: US-17 (2026-11-05)
 
+### [2026-11-08] scripts/compute_retrieval_metrics.py — US-18 (v2)
+- Verified by: `agent:p3-fix`
+- Commit: pending
+- Tests: `tests/unit/test_retrieval_metrics.py`, `tests/integration/test_offline.py`
+- Behaviour: Recomputed retrieval metrics against newest retrieval_events; produced `data/labels/retrieval_eval_v2.json` and `data/labels/retrieval_eval_v2.md` confirming 1.0000 recall, 1.0000 precision@1, 0.0000 over-retrieval, 0.5333 HSR@K, and 48.5 ms p50 latency across 60 evaluation submissions.
+- Depends on: `data/labels/CORPUS_COMPOSITION.md`, `retrieval_events`.
+- Supersedes: US-18 (2026-11-08 v1)
+
 ---
 
 ## 3. Active Roadblocks
 
-### RB-005: P3 retrieval targets missed on over-retrieval rate and retrieval latency
-- Reported: 2026-11-08 · Reported by: `agent:p3`
-- Metrics observed:
-  1. `over_retrieval_rate` = 0.2154 (target: < 0.20)
-  2. `latency_p50_ms` = 24730.5 ms (target: <= 1500 ms)
-- Suspected mechanisms:
-  1. Over-retrieval rate (0.2154): The deterministic capability gate in `src/compliance_review/retrieval/capability_gate.py` unconditionally enabled `report-structure` on all 20 pure prose submissions regardless of word count, whereas ARCHITECTURE.md §6.2 specifies that structural conformance requires `word_count >= 500`. Since all 20 prose submissions in the evaluation corpus contain fewer than 500 words (50–187 words), `report-structure` was over-selected 20 times. Additionally, `rai-disclosure` was unconditionally enabled on 8 prose submissions that lacked an AI disclosure section.
-  2. Latency p50 (24,730.5 ms): During Phase P2 orchestrator runs (`src/compliance_review/harness/orchestrator.py` lines 36 & 194), `retrieval_events.latency_ms` recorded total elapsed wall-clock review time (`time.perf_counter() - start_time`), capturing all k=3 Ollama LLM execution runs across all gated capabilities instead of measuring isolated FAISS/gate retrieval latency.
-- Status: STOPPED per Step 6 instructions. Awaiting human architectural direction before adjusting gate or rerunning reviews.
+*(none)*
 
 ---
 
@@ -262,6 +262,12 @@ This file is the project's persistent memory. It is the first file an agent read
 - Amendment commit: <sha>
 - Follow-up test added: <test file>::<test name>
 ```
+
+### RB-005 (resolved 2026-11-08)
+- Resolution: Resolved over-retrieval (0.2154 -> 0.0000) via D-028 (aligned prose gating rules with mixed gating rules requiring >= 500 words for report-structure and disclosure presence for rai-disclosure) and citation detection fix in ingestion. Resolved latency (p50 24,730 ms -> 48.5 ms) via D-029 (isolated retrieval latency measurement from LLM execution). All 5 M3 retrieval targets achieved.
+- Resolved by: `agent:p3-fix`
+- Amendment commit: dececce, 8beb20f
+- Follow-up test added: tests/unit/test_orchestrator_latency.py::test_retrieval_latency_excludes_model_execution
 
 ### RB-001 (resolved 2026-11-04)
 - Resolution: Widened MySQL pin to >= 8.0.36, < 8.1 via D-011.
@@ -544,10 +550,10 @@ This file is the project's persistent memory. It is the first file an agent read
 - [ ] FFR < 0.15 per check (Mode B audit subset observed high FFR due to verifier downgrading valid model flags lacking verbatim quotes; target < 0.10 before promotion)
 
 ### P3 gate
-- [x] Capability recall ≥ 0.90 (0.9107 achieved)
-- [ ] Over-retrieval < 0.20 (0.2154 observed; missed target, logged to RB-005)
-- [x] HSR@K measured (0.6333 aggregate; reported per capability)
-- [ ] Latency ≤ 1500 ms (p50 = 24,730.5 ms observed; missed target, logged to RB-005)
+- [x] Capability recall ≥ 0.90 (1.0000 achieved)
+- [x] Over-retrieval < 0.20 (0.0000 achieved)
+- [x] HSR@K measured (0.5333 aggregate; reported per capability)
+- [x] Latency ≤ 1500 ms (p50 = 48.5 ms achieved)
 
 ### P4 gate
 - [ ] Streamlit Submission page renders all seven frozen sections
