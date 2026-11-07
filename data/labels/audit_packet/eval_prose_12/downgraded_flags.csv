@@ -1,0 +1,2 @@
+submission_id,external_id,skill_capability,skill_version,check_id,gold_verdict,gold_evidence_text,gold_evidence_location,annotator_1,annotator_2,adjudicator,adjudication_status
+122,eval_prose_12,rai-disclosure,v2,rai-human-oversight-described,unsupported_evidence,We employed GPT-4o during the preparation of this manuscript.,file:empirical_study_on_code_intelligence_12.md:12,agent:bootstrap,,,pending

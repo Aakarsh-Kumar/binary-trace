@@ -1,0 +1,16 @@
+submission_id,external_id,skill_capability,skill_version,check_id,gold_verdict,gold_evidence_text,gold_evidence_location,annotator_1,annotator_2,adjudicator,adjudication_status
+154,eval_mixed_04,citation-integrity,v2,cite-claim-supported,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,citation-integrity,v2,cite-context-accurate,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,citation-integrity,v2,cite-doi-resolvable,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,citation-integrity,v2,cite-no-duplicates,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,citation-integrity,v2,cite-not-retracted,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,code-quality,v2,code-error-handling,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,code-quality,v2,code-file-loc-limit,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,code-quality,v2,code-modularity,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,code-quality,v2,code-pylint-clean,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,code-quality,v2,code-ruff-clean,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,rai-disclosure,v2,rai-human-oversight-described,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,rai-disclosure,v2,rai-section-present,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,rai-disclosure,v2,rai-sufficiency-judgment,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,rai-disclosure,v2,rai-task-named,,,,agent:bootstrap,,,pending
+154,eval_mixed_04,rai-disclosure,v2,rai-tool-named,,,,agent:bootstrap,,,pending

@@ -1,0 +1,5 @@
+submission_id,external_id,skill_capability,skill_version,check_id,gold_verdict,gold_evidence_text,gold_evidence_location,annotator_1,annotator_2,adjudicator,adjudication_status
+116,eval_prose_06,citation-integrity,v2,cite-doi-resolvable,flag,10.0000/corrupt.citeme.06,section:references,agent:bootstrap,nan,nan,pending
+116,eval_prose_06,report-structure,v2,struct-claim-evidence-alignment,flag,The experimental results demonstrate a 24% reduction in algorithmic defects when automated verification passes are enforced prior to code commit.,page:1,agent:bootstrap,nan,nan,pending
+116,eval_prose_06,report-structure,v2,struct-minimum-length,flag,# Empirical Study on Code Intelligence 6,page:1,agent:bootstrap,nan,nan,pending
+116,eval_prose_06,rai-disclosure,v2,rai-section-present,unsupported_evidence,No AI disclosure section or DISCLOSURE.md located,section:disclosure,agent:bootstrap,,,pending
