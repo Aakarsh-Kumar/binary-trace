@@ -44,7 +44,7 @@ def _safe_st_table(data: Any, *args: Any, **kwargs: Any) -> Any:
         raise
 
 
-st.table = _safe_st_table
+st.table = _safe_st_table  # type: ignore[assignment]
 
 SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 REASON_CODES = [
