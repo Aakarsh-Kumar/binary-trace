@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.9 |
+| Document version | 1.3.0 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P3 closed / Ready for P4 (Milestone M3 achieved) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 3d95c5e |
-| Unit test count | 60 |
+| Last green commit | 54aed66 |
+| Unit test count | 62 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -239,11 +239,19 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] scripts/compute_retrieval_metrics.py — US-18 (v2)
 - Verified by: `agent:p3-fix`
-- Commit: pending
+- Commit: 3d95c5e
 - Tests: `tests/unit/test_retrieval_metrics.py`, `tests/integration/test_offline.py`
 - Behaviour: Recomputed retrieval metrics against newest retrieval_events; produced `data/labels/retrieval_eval_v2.json` and `data/labels/retrieval_eval_v2.md` confirming 1.0000 recall, 1.0000 precision@1, 0.0000 over-retrieval, 0.5333 HSR@K, and 48.5 ms p50 latency across 60 evaluation submissions.
 - Depends on: `data/labels/CORPUS_COMPOSITION.md`, `retrieval_events`.
 - Supersedes: US-18 (2026-11-08 v1)
+
+### [2026-11-08] src/compliance_review/db/repository.py — US-29, US-30, US-33, D-030
+- Verified by: `agent:p4`
+- Commit: pending
+- Tests: `tests/unit/test_repository_readonly.py`
+- Behaviour: Implements read-only query helpers for dashboard rendering: `get_retrieval_event_for_submission` (ORDER BY id DESC LIMIT 1), `get_skill_executions_for_submission`, `get_verdicts_for_execution`, `get_verdicts_for_submission`, `get_evidence_verifications_for_verdict`, `get_reviewer_feedback_for_submission`, and `list_submissions`. Uses SQLAlchemy Core select() only.
+- Depends on: `src/compliance_review/db/tables.py`, `src/compliance_review/db/engine.py`.
+- Supersedes: none
 
 ---
 

@@ -83,21 +83,31 @@ def create_submission(
         raise DatabaseError(f"Failed to create submission {external_id}: {exc}") from exc
 
 
-def get_submission_by_id(submission_id: int) -> dict[str, Any] | None:
+def get_submission_by_id(
+    submission_id: int, conn: Connection | None = None
+) -> dict[str, Any] | None:
     """Retrieve submission by primary key."""
-    engine = get_engine()
-    with engine.connect() as conn:
-        stmt = select(submissions).where(submissions.c.id == submission_id)
+    stmt = select(submissions).where(submissions.c.id == submission_id)
+    if conn is not None:
         row = conn.execute(stmt).mappings().first()
+        return dict(row) if row else None
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        row = active_conn.execute(stmt).mappings().first()
         return dict(row) if row else None
 
 
-def get_submission_by_external_id(external_id: str) -> dict[str, Any] | None:
+def get_submission_by_external_id(
+    external_id: str, conn: Connection | None = None
+) -> dict[str, Any] | None:
     """Retrieve submission by external identifier."""
-    engine = get_engine()
-    with engine.connect() as conn:
-        stmt = select(submissions).where(submissions.c.external_id == external_id)
+    stmt = select(submissions).where(submissions.c.external_id == external_id)
+    if conn is not None:
         row = conn.execute(stmt).mappings().first()
+        return dict(row) if row else None
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        row = active_conn.execute(stmt).mappings().first()
         return dict(row) if row else None
 
 
@@ -423,3 +433,163 @@ def record_reviewer_feedback(
             return feedback_id
     except Exception as exc:
         raise DatabaseError(f"Failed to record reviewer feedback: {exc}") from exc
+
+
+def get_retrieval_event_for_submission(
+    submission_id: int,
+    conn: Connection | None = None,
+) -> dict[str, Any] | None:
+    """Retrieve newest retrieval event for a submission (D-030)."""
+    stmt = (
+        select(retrieval_events)
+        .where(retrieval_events.c.submission_id == submission_id)
+        .order_by(retrieval_events.c.id.desc())
+        .limit(1)
+    )
+    if conn is not None:
+        row = conn.execute(stmt).mappings().first()
+        return dict(row) if row else None
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        row = active_conn.execute(stmt).mappings().first()
+        return dict(row) if row else None
+
+
+def get_skill_executions_for_submission(
+    submission_id: int,
+    conn: Connection | None = None,
+) -> list[dict[str, Any]]:
+    """Retrieve all skill execution runs for a submission (D-030)."""
+    stmt = (
+        select(skill_executions)
+        .where(skill_executions.c.submission_id == submission_id)
+        .order_by(skill_executions.c.skill_capability, skill_executions.c.run_index)
+    )
+    if conn is not None:
+        rows = conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        rows = active_conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+
+
+def get_verdicts_for_execution(
+    execution_id: int,
+    conn: Connection | None = None,
+) -> list[dict[str, Any]]:
+    """Retrieve all checklist verdicts for a specific execution run (D-030)."""
+    stmt = (
+        select(checklist_verdicts)
+        .where(checklist_verdicts.c.execution_id == execution_id)
+        .order_by(checklist_verdicts.c.id)
+    )
+    if conn is not None:
+        rows = conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        rows = active_conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+
+
+def get_verdicts_for_submission(
+    submission_id: int,
+    conn: Connection | None = None,
+) -> list[dict[str, Any]]:
+    """Retrieve all checklist verdicts for a submission across all executions (D-030)."""
+    stmt = (
+        select(
+            checklist_verdicts.c.id,
+            checklist_verdicts.c.execution_id,
+            checklist_verdicts.c.check_id,
+            checklist_verdicts.c.verdict,
+            checklist_verdicts.c.severity,
+            checklist_verdicts.c.evidence_text,
+            checklist_verdicts.c.evidence_location,
+            checklist_verdicts.c.confidence,
+            checklist_verdicts.c.check_source,
+            checklist_verdicts.c.created_at,
+            skill_executions.c.skill_capability,
+            skill_executions.c.skill_version,
+            skill_executions.c.run_index,
+        )
+        .select_from(
+            checklist_verdicts.join(
+                skill_executions,
+                checklist_verdicts.c.execution_id == skill_executions.c.id,
+            )
+        )
+        .where(skill_executions.c.submission_id == submission_id)
+        .order_by(
+            skill_executions.c.skill_capability,
+            checklist_verdicts.c.check_id,
+            skill_executions.c.run_index,
+        )
+    )
+    if conn is not None:
+        rows = conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        rows = active_conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+
+
+def get_evidence_verifications_for_verdict(
+    verdict_id: int,
+    conn: Connection | None = None,
+) -> list[dict[str, Any]]:
+    """Retrieve evidence verification records for a specific verdict (D-030)."""
+    stmt = (
+        select(evidence_verifications)
+        .where(evidence_verifications.c.verdict_id == verdict_id)
+        .order_by(evidence_verifications.c.id.desc())
+    )
+    if conn is not None:
+        rows = conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        rows = active_conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+
+
+def get_reviewer_feedback_for_submission(
+    submission_id: int,
+    conn: Connection | None = None,
+) -> list[dict[str, Any]]:
+    """Retrieve all reviewer feedback records for a submission (D-030)."""
+    stmt = (
+        select(reviewer_feedback)
+        .where(reviewer_feedback.c.submission_id == submission_id)
+        .order_by(reviewer_feedback.c.id.desc())
+    )
+    if conn is not None:
+        rows = conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        rows = active_conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+
+
+def list_submissions(
+    limit: int = 50,
+    offset: int = 0,
+    conn: Connection | None = None,
+) -> list[dict[str, Any]]:
+    """List submissions paged for sidebar selection (D-030)."""
+    stmt = (
+        select(submissions)
+        .order_by(submissions.c.id.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    if conn is not None:
+        rows = conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
+    engine = get_engine()
+    with engine.connect() as active_conn:
+        rows = active_conn.execute(stmt).mappings().all()
+        return [dict(r) for r in rows]
