@@ -164,7 +164,7 @@ def render_retrieval_trace(retrieval_event: dict[str, Any] | None) -> None:
                     "FAISS Score": f"{s.get('score', 0.0):.4f}",
                 }
             )
-        st.dataframe(sel_display, use_container_width=True, hide_index=True)
+        st.table(sel_display)
 
 
 # ────────────────────────────────────────────────────────────────────────
