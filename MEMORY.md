@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.9 |
+| Document version | 1.3.10 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4-hotfix in progress (real-render integration test added) |
+| Current phase | P4-hotfix in progress (manual streamlit verification completed) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 8819c32 |
+| Last green commit | 31a8da1 |
 | Unit test count | 64 |
 | Integration test count | 16 |
 | Skills at `eval_status: active` | 0 |

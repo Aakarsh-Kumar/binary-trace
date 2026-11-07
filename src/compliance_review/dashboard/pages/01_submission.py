@@ -508,7 +508,7 @@ def render_submission_page(external_id: str | None = None) -> None:
             if c_id in seen_checks:
                 continue
             evs = cached_get_evidence_verifications_for_verdict(v_id)
-            if any(ev.get("verified") is True for ev in evs):
+            if any(bool(ev.get("verified")) for ev in evs):
                 verified_findings.append(v)
                 seen_checks.add(c_id)
 
