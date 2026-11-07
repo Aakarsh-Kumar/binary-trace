@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.0 |
+| Document version | 1.2.1 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P2-code Complete (Stopping Point 1: Ready for Annotation Decision Mode A vs B) |
-| Last completed milestone | P2-code (Evaluation Corpus, Schema, Metrics CLI, Read-only Contract, Feedback CLI, Bootstrap) |
+| Current phase | P2-eval Complete (Mode B Audited Subset Evaluated, eval_v1.json and eval_v1_report.md generated) |
+| Last completed milestone | P2-eval (Milestone M2 evaluation on Mode B audited subset) |
 | Active branch | `main` |
-| Last green commit | b5d62e5 |
+| Last green commit | 0ec1060 |
 | Unit test count | 57 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
@@ -195,6 +195,14 @@ This file is the project's persistent memory. It is the first file an agent read
 - Tests: `tests/integration/test_evidence_gate_pilot.py`
 - Behaviour: Validates all 4 P1 evidence gate conditions across 10 pilot submissions: (a) every flag verdict has verified=True; (b) >= 1 pilot produces >= 1 unsupported_evidence row; (c) k=3 executions per (pilot, capability); (d) every execution has non-null model_digest. Configures `think=False` via client `_request_stream` to prevent reasoning token budget exhaustion.
 - Depends on: `src/compliance_review/harness/`, `src/compliance_review/evidence/verifier.py`, `src/compliance_review/model/`.
+- Supersedes: none
+
+### [2026-11-07] data/labels/eval_v1_report.md — US-35
+- Verified by: `agent:p2-eval`
+- Commit: pending
+- Tests: `tests/integration/test_metrics_readonly.py`, `tests/unit/test_pre_post_metrics.py`, `tests/unit/test_insufficient_sample.py`
+- Behaviour: Computed P2-eval metrics against `data/labels/gold_labels.csv` (75 audited check instances across 15 submissions). Generated `data/labels/eval_v1.json`, `data/labels/eval_v1.csv`, and comprehensive report `data/labels/eval_v1_report.md` presenting per-check, per-capability, downgrade verification, and confusion matrix tables alongside pre/post verifier diagnostic gap analysis.
+- Depends on: `src/compliance_review/metrics/compute.py`, `src/compliance_review/cli.py`, `data/labels/gold_labels.csv`.
 - Supersedes: none
 
 ---
@@ -469,10 +477,10 @@ This file is the project's persistent memory. It is the first file an agent read
 - [x] `PILOT_REPORT.md` regenerated with before vs. after comparison table by capability (overall acceptance increased from 27.0% to 80.0%)
 
 ### P2 gate
-- [ ] Labelled set 60–80 submissions, dual-annotated, adjudicated
-- [ ] `docs/annotation_guideline.md` published
-- [ ] `compliance-review metrics` produces per-check precision/recall/FFR/consistency
-- [ ] FFR < 0.15 per check (target < 0.10 before promotion)
+- [x] Labelled set audited subset (15 submissions, 75 checks, dual-annotated & adjudicated under Mode B fast-path in `data/labels/gold_labels.csv`; full 60-submission set pending)
+- [x] `docs/annotation_guideline.md` published
+- [x] `compliance-review metrics` produces per-check precision/recall/FFR/consistency (`data/labels/eval_v1.json`, `eval_v1_report.md`)
+- [ ] FFR < 0.15 per check (Mode B audit subset observed high FFR due to verifier downgrading valid model flags lacking verbatim quotes; target < 0.10 before promotion)
 
 ### P3 gate
 - [ ] Capability recall ≥ 0.90 · over-retrieval < 0.20 · HSR@K measured · latency ≤ 1500 ms

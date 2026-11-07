@@ -44,9 +44,9 @@ def compute_metrics(
     if not labels_file.exists():
         raise FileNotFoundError(f"Labels file not found: {labels_file}")
 
-    # 1. Parse gold labels CSV
+    # 1. Parse gold labels CSV (support utf-8-sig to handle optional BOM)
     gold_records: list[dict[str, str]] = []
-    with labels_file.open("r", encoding="utf-8") as f:
+    with labels_file.open("r", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         for row in reader:
             status = row.get("adjudication_status", "").strip().lower()

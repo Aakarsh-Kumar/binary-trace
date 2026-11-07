@@ -1,0 +1,11 @@
+"folder","check_id","kind","evidence","loc"
+"eval_code_04","code-file-loc-limit","downgrade",,
+"eval_code_04","code-modularity","downgrade",,
+"eval_code_16","code-file-loc-limit","downgrade",,
+"eval_code_16","code-modularity","downgrade",,
+"eval_mixed_19","code-file-loc-limit","downgrade",,
+"eval_mixed_19","code-modularity","downgrade",,
+"eval_prose_04","rai-section-present","downgrade",,
+"eval_prose_06","rai-section-present","downgrade",,
+"eval_prose_10","rai-section-present","downgrade",,
+"eval_prose_12","rai-human-oversight-described","downgrade",,
