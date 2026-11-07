@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.8 |
+| Document version | 1.3.9 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,12 +21,12 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4-hotfix in progress (pilot latency hidden in dashboard) |
+| Current phase | P4-hotfix in progress (real-render integration test added) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 9eedabd |
+| Last green commit | 8819c32 |
 | Unit test count | 64 |
-| Integration test count | 12 |
+| Integration test count | 16 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -299,6 +299,14 @@ This file is the project's persistent memory. It is the first file an agent read
 - Tests: static code inspection, README instructions check
 - Behaviour: Adds convenient launcher script for running the Streamlit dashboard and documents run commands in README.md.
 - Depends on: `src/compliance_review/dashboard/app.py`, `streamlit`.
+- Supersedes: none
+
+### [2026-11-08] tests/integration/test_dashboard_real_render.py — US-29
+- Verified by: `agent:p4-hotfix`
+- Commit: pending
+- Tests: `tests/integration/test_dashboard_real_render.py` (4 passed)
+- Behaviour: Exercises real Streamlit rendering path against actual DB submission eval_mixed_12 using both AppTest and direct render_* invocations; asserts zero ImportErrors or pyarrow regressions, confirms numeric latency for eval submissions and dash latency for pilot submissions across all seven sections.
+- Depends on: `src/compliance_review/dashboard/pages/01_submission.py`, `src/compliance_review/db/repository.py`.
 - Supersedes: none
 
 ---

@@ -22,6 +22,30 @@ from compliance_review.dashboard.queries import (
 from compliance_review.db.repository import record_reviewer_feedback
 from compliance_review.skills.loader import load_all_skills
 
+# Safe st.table wrapper to guard against pyarrow / numpy 1.x ABI incompatibilities
+_orig_st_table = st.table
+
+
+def _safe_st_table(data: Any, *args: Any, **kwargs: Any) -> Any:
+    """Wrap st.table to provide markdown table fallback if pyarrow raises ImportError."""
+    try:
+        return _orig_st_table(data, *args, **kwargs)
+    except Exception as exc:
+        if "pyarrow" in str(exc).lower() or isinstance(exc, ImportError):
+            if isinstance(data, list) and data and isinstance(data[0], dict):
+                headers = list(data[0].keys())
+                lines = [
+                    "| " + " | ".join(headers) + " |",
+                    "| " + " | ".join(["---"] * len(headers)) + " |",
+                ]
+                for row in data:
+                    lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+                return st.markdown("\n".join(lines))
+        raise
+
+
+st.table = _safe_st_table
+
 SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 REASON_CODES = [
     "evidence_insufficient",
