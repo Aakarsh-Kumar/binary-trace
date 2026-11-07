@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.4 |
+| Document version | 1.3.5 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,12 +21,12 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4-code in progress (deferred pages stubbed) |
+| Current phase | P4-code in progress (read-only integration tests verified) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 08c6306 |
+| Last green commit | db76948 |
 | Unit test count | 64 |
-| Integration test count | 9 |
+| Integration test count | 12 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -279,10 +279,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] src/compliance_review/dashboard/pages/02_skill_library.py, 03_metrics.py — D-033
 - Verified by: `agent:p4`
-- Commit: pending
+- Commit: db76948
 - Tests: static code inspection, mypy
 - Behaviour: Stubs pages 02_skill_library.py and 03_metrics.py with st.info("Deferred to camera-ready (D-033).") per ARCHITECTURE.md §10.1 and D-033.
 - Depends on: `streamlit`.
+- Supersedes: none
+
+### [2026-11-08] tests/integration/test_dashboard_readonly.py — US-29, D-030, D-032
+- Verified by: `agent:p4`
+- Commit: pending
+- Tests: `tests/integration/test_dashboard_readonly.py` (3 passed)
+- Behaviour: Asserts the read-only contract for the dashboard: verifies all 7 render functions handle empty/mock data without calling st.write(), verifies render_submission_page calls only D-030 repository read helpers and zero write functions, and verifies reviewer feedback button action handler writes atomically exactly one reviewer_feedback row and one audit_log row via isolated SQLite fixture.
+- Depends on: `src/compliance_review/dashboard/pages/01_submission.py`, `src/compliance_review/db/repository.py`.
 - Supersedes: none
 
 ---
