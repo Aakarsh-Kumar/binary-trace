@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.3 |
+| Document version | 1.3.4 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4-code in progress (Submission review page built) |
+| Current phase | P4-code in progress (deferred pages stubbed) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | f1d901d |
+| Last green commit | 08c6306 |
 | Unit test count | 64 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
@@ -271,10 +271,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] src/compliance_review/dashboard/pages/01_submission.py — US-29, US-30, US-33
 - Verified by: `agent:p4`
-- Commit: pending
+- Commit: 08c6306
 - Tests: `tests/unit/test_dashboard_agreement_source.py`, `tests/integration/test_dashboard_readonly.py`, mypy
 - Behaviour: Implements the seven frozen sections of ARCHITECTURE.md §10.2: Header, Retrieval trace, Findings (verified flags, click-through location context, action buttons), Disagreement view (< 0.85 side-by-side runs), Passed checks (collapsed markdown table), Unsupported evidence (collapsed), and Audit footer. Empty states handled explicitly in each section. Factored into standalone render_* functions.
 - Depends on: `src/compliance_review/dashboard/queries.py`, `src/compliance_review/dashboard/agreement.py`.
+- Supersedes: none
+
+### [2026-11-08] src/compliance_review/dashboard/pages/02_skill_library.py, 03_metrics.py — D-033
+- Verified by: `agent:p4`
+- Commit: pending
+- Tests: static code inspection, mypy
+- Behaviour: Stubs pages 02_skill_library.py and 03_metrics.py with st.info("Deferred to camera-ready (D-033).") per ARCHITECTURE.md §10.1 and D-033.
+- Depends on: `streamlit`.
 - Supersedes: none
 
 ---
