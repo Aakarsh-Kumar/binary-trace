@@ -184,6 +184,7 @@ compliance-review/
 │   ├── pilots/                           # 10 hand-authored pilot submissions (<= 50 KB each, committed) (D-013)
 │   ├── submissions/
 │   ├── labels/
+│   │   └── CORPUS_COMPOSITION.md         # per-submission gold properties (D-027)
 │   ├── vector_index/
 │   ├── cache/
 │   └── logs/
@@ -202,6 +203,7 @@ compliance-review/
     ├── ingest.py
     ├── run_review.py
     ├── compute_metrics.py
+    ├── compute_retrieval_metrics.py      # retrieval evaluation metrics (D-027)
     └── fetch_datasets.py
 ```
 

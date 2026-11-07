@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.2 |
+| Document version | 1.2.3 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P2-eval Complete (Audit-Corrected Run v2 Evaluated; eval_v2.json and eval_v2_report.md generated) |
+| Current phase | P3 (Milestone M3 Retrieval Metrics Computation) |
 | Last completed milestone | P2-eval (Milestone M2 evaluation on audit-corrected labels) |
 | Active branch | `main` |
-| Last green commit | c18fe11 |
+| Last green commit | e8be242 |
 | Unit test count | 57 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
@@ -412,6 +412,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Date: 2026-11-06 · Decided by: human:arch
 - Decision: Dashboard Metrics page gains a "Pre vs Post Verifier" comparison view (read-only).
 - Documents amended: ARCHITECTURE.md §10.3
+- Reversible: yes
+
+### D-027: Retrieval metrics script and corpus composition gold
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Add `scripts/compute_retrieval_metrics.py` (retrieval metrics evaluation CLI/script) and `data/labels/CORPUS_COMPOSITION.md` (per-submission gold properties across 60 evaluation corpus submissions).
+- Context: Required for P3 Milestone M3 retrieval evaluation without modifying capability_gate.py or P2 evaluation outputs.
+- Documents amended: ARCHITECTURE.md §3
 - Reversible: yes
 
 ---
