@@ -236,6 +236,8 @@ CREATE TABLE submissions (
 
 ### 4.2 `retrieval_events`
 
+`retrieval_events.latency_ms` is defined as the milliseconds elapsed in the capability gate + FAISS version selection ONLY — NOT the full review, NOT the model execution time (D-029).
+
 ```sql
 CREATE TABLE retrieval_events (
   id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -445,11 +447,11 @@ There is no stage where Qwen decides which capability to use. The model is never
 
 | Submission type | Capabilities enabled |
 |---|---|
-| `prose` | `citation-integrity`, `report-structure`, `rai-disclosure` |
+| `prose` | `citation-integrity` if references_present; `report-structure` if prose_length >= 500 words; `rai-disclosure` if disclosure_present |
 | `code` | `code-quality` |
-| `mixed` | all four |
+| `mixed` | all four (subject to preconditions below) |
 
-Within `mixed`:
+Within `prose` and `mixed`:
 
 - `citation-integrity` requires a bibliography detected by `ingestion/` (`.bib`, `.ris`, or a `References` heading).
 - `rai-disclosure` requires a disclosure section by heading keyword (`Disclosure`, `AI Use`, `Responsible AI`) OR a top-level `DISCLOSURE.md`.

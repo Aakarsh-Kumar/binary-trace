@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.4 |
+| Document version | 1.2.5 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -436,6 +436,20 @@ This file is the project's persistent memory. It is the first file an agent read
 - Context: Required for P3 Milestone M3 retrieval evaluation without modifying capability_gate.py or P2 evaluation outputs.
 - Documents amended: ARCHITECTURE.md §3
 - Reversible: yes
+
+### D-028: Align prose gating rules with mixed gating rules
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Amend ARCHITECTURE.md §6.2 capability gate table. For prose submissions: citation-integrity requires references_present; report-structure requires prose_length >= 500 words; rai-disclosure requires disclosure_present.
+- Context: In P3, unconditional enabling of report-structure and rai-disclosure on short prose submissions (< 500 words, no disclosure) caused over-retrieval rate of 0.2154 (exceeding target < 0.20). Aligning prose preconditions prevents false positive gate activations.
+- Documents amended: ARCHITECTURE.md §6.2
+- Reversible: no
+
+### D-029: Define retrieval_events.latency_ms as retrieval-only time
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: retrieval_events.latency_ms is defined as milliseconds elapsed in capability gate + FAISS version selection ONLY, not the entire review execution or LLM inference.
+- Context: In P3, latency was recorded as total review duration (p50 = 24,730 ms), conflating model execution with retrieval latency. The target (p50 <= 1500 ms) measures retrieval efficiency as specified in PRD §6.1.
+- Documents amended: ARCHITECTURE.md §4.2
+- Reversible: no
 
 ---
 
