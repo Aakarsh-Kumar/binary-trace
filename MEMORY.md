@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.3 |
+| Document version | 1.2.4 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,17 +21,17 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P3 (Milestone M3 Retrieval Metrics Computation) |
+| Current phase | P3 (Milestone M3 Retrieval Evaluation - Roadblock Recorded) |
 | Last completed milestone | P2-eval (Milestone M2 evaluation on audit-corrected labels) |
 | Active branch | `main` |
-| Last green commit | e8be242 |
-| Unit test count | 57 |
+| Last green commit | 879438e |
+| Unit test count | 59 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
 | Known failing tests | 0 |
-| Open roadblocks | 0 |
+| Open roadblocks | 1 (RB-005) |
 | Frozen invariants intact | yes |
 
 **Environment (recorded at P0 preflight 2026-11-04):**
@@ -207,17 +207,33 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-07] data/labels/eval_v2_report.md — US-35
 - Verified by: `agent:p2-eval`
-- Commit: pending
+- Commit: e8be242
 - Tests: `tests/integration/test_metrics_readonly.py`, `tests/unit/test_pre_post_metrics.py`, `tests/unit/test_insufficient_sample.py`
 - Behaviour: Computed P2-eval metrics against audit-corrected `data/labels/gold_labels.csv` (75 audited check instances, 20 gold flags, 55 clean). Generated `data/labels/eval_v2.json`, `data/labels/eval_v2.csv`, and report `data/labels/eval_v2_report.md` showing post-verifier precision = 0.5263, post-verifier recall = 0.5000, pre-verifier precision = 0.6897, pre-verifier recall = 1.0000, and FFR = 0.4737 after correcting 10 audit mislabelings in `struct-minimum-length` and `cite-doi-resolvable`.
 - Depends on: `src/compliance_review/metrics/compute.py`, `src/compliance_review/cli.py`, `data/labels/gold_labels.csv`.
 - Supersedes: `data/labels/eval_v1_report.md`
 
+### [2026-11-08] scripts/compute_retrieval_metrics.py — US-18, D-027
+- Verified by: `agent:p3`
+- Commit: pending
+- Tests: `tests/unit/test_retrieval_metrics.py` (formula correctness, HSR@K sensitivity, read-only contract)
+- Behaviour: Computes capability recall, version precision@1, over-retrieval rate, HSR@K risk exposure, and retrieval latency distribution across 60 evaluation submissions against gold standard `data/labels/CORPUS_COMPOSITION.md`. Generates `data/labels/retrieval_eval_v1.json` and Markdown report `data/labels/retrieval_eval_v1.md` with 4 evaluation tables.
+- Depends on: `data/labels/CORPUS_COMPOSITION.md`, `retrieval_events`, `skills/`.
+- Supersedes: none
+
 ---
 
 ## 3. Active Roadblocks
 
-(No active roadblocks.)
+### RB-005: P3 retrieval targets missed on over-retrieval rate and retrieval latency
+- Reported: 2026-11-08 · Reported by: `agent:p3`
+- Metrics observed:
+  1. `over_retrieval_rate` = 0.2154 (target: < 0.20)
+  2. `latency_p50_ms` = 24730.5 ms (target: <= 1500 ms)
+- Suspected mechanisms:
+  1. Over-retrieval rate (0.2154): The deterministic capability gate in `src/compliance_review/retrieval/capability_gate.py` unconditionally enabled `report-structure` on all 20 pure prose submissions regardless of word count, whereas ARCHITECTURE.md §6.2 specifies that structural conformance requires `word_count >= 500`. Since all 20 prose submissions in the evaluation corpus contain fewer than 500 words (50–187 words), `report-structure` was over-selected 20 times. Additionally, `rai-disclosure` was unconditionally enabled on 8 prose submissions that lacked an AI disclosure section.
+  2. Latency p50 (24,730.5 ms): During Phase P2 orchestrator runs (`src/compliance_review/harness/orchestrator.py` lines 36 & 194), `retrieval_events.latency_ms` recorded total elapsed wall-clock review time (`time.perf_counter() - start_time`), capturing all k=3 Ollama LLM execution runs across all gated capabilities instead of measuring isolated FAISS/gate retrieval latency.
+- Status: STOPPED per Step 6 instructions. Awaiting human architectural direction before adjusting gate or rerunning reviews.
 
 ---
 
@@ -498,7 +514,10 @@ This file is the project's persistent memory. It is the first file an agent read
 - [ ] FFR < 0.15 per check (Mode B audit subset observed high FFR due to verifier downgrading valid model flags lacking verbatim quotes; target < 0.10 before promotion)
 
 ### P3 gate
-- [ ] Capability recall ≥ 0.90 · over-retrieval < 0.20 · HSR@K measured · latency ≤ 1500 ms
+- [x] Capability recall ≥ 0.90 (0.9107 achieved)
+- [ ] Over-retrieval < 0.20 (0.2154 observed; missed target, logged to RB-005)
+- [x] HSR@K measured (0.6333 aggregate; reported per capability)
+- [ ] Latency ≤ 1500 ms (p50 = 24,730.5 ms observed; missed target, logged to RB-005)
 
 ### P4 gate
 - [ ] Streamlit Submission page renders all seven frozen sections
