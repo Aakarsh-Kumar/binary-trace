@@ -8,7 +8,8 @@ from pathlib import Path
 
 
 def main() -> None:
-    app_path = Path(__file__).resolve().parent.parent / "src" / "compliance_review" / "dashboard" / "app.py"
+    dash_dir = Path(__file__).resolve().parent.parent / "src" / "compliance_review" / "dashboard"
+    app_path = dash_dir / "app.py"
     cmd = [sys.executable, "-m", "streamlit", "run", str(app_path)]
     sys.exit(subprocess.call(cmd))
 

@@ -244,10 +244,11 @@ def render_findings(
                 # Action buttons (Approve / Override / Request re-run)
                 recorded_fb = feedback_by_verdict.get(v_id)
                 if recorded_fb:
-                    st.success(
-                        f"Action recorded: **{recorded_fb['action'].upper()}** by `{recorded_fb['reviewer_id']}` "
-                        + (f"({recorded_fb['reason_code']})" if recorded_fb.get("reason_code") else "")
-                    )
+                    act_txt = recorded_fb["action"].upper()
+                    rev_txt = recorded_fb["reviewer_id"]
+                    r_code = recorded_fb.get("reason_code")
+                    code_suffix = f" ({r_code})" if r_code else ""
+                    st.success(f"Action recorded: **{act_txt}** by `{rev_txt}`{code_suffix}")
                 else:
                     btn_c1, btn_c2, btn_c3 = st.columns([1, 2, 1])
 

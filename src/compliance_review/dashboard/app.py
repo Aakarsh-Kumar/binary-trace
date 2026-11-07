@@ -44,9 +44,7 @@ st.sidebar.subheader("Model Telemetry")
 settings = Settings()  # type: ignore[call-arg] # reason: pydantic-settings populates from env
 model_name = settings.cr_ollama_model
 
-latest_execs = (
-    cached_get_skill_executions_for_submission(subs[0]["id"]) if subs else []
-)
+latest_execs = cached_get_skill_executions_for_submission(subs[0]["id"]) if subs else []
 model_digest = str(latest_execs[0]["model_digest"]) if latest_execs else "359d7dd4bcdab3d8"
 
 st.sidebar.caption(f"**Model:** `{model_name}`")
@@ -60,4 +58,3 @@ if st.button("Open Submission Review"):
         st.switch_page("pages/01_submission.py")
     except Exception:
         pass
-

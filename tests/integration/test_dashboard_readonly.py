@@ -8,7 +8,7 @@ from __future__ import annotations
 import importlib
 import sqlite3
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import streamlit as st
@@ -19,17 +19,21 @@ from sqlalchemy.ext.compiler import compiles
 from compliance_review.db import repository
 from compliance_review.db.tables import metadata, submissions
 
+
 @compiles(BIGINT, "sqlite")
 def _compile_bigint_sqlite(type_: Any, compiler: Any, **kw: Any) -> str:
     return "INTEGER"
+
 
 @compiles(TINYINT, "sqlite")
 def _compile_tinyint_sqlite(type_: Any, compiler: Any, **kw: Any) -> str:
     return "INTEGER"
 
+
 @compiles(LONGTEXT, "sqlite")
 def _compile_longtext_sqlite(type_: Any, compiler: Any, **kw: Any) -> str:
     return "TEXT"
+
 
 submission_page = importlib.import_module("compliance_review.dashboard.pages.01_submission")
 render_header = submission_page.render_header
@@ -79,23 +83,27 @@ def forbidden_st_write(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_render_functions_empty_and_mock_data_no_st_write(
     forbidden_st_write: None,
 ) -> None:
-    """Requirement 1 & 4: All 7 render functions can be called with empty/mock data and never call st.write."""
+    """Requirement 1 & 4: All 7 render functions can run on empty/mock data without st.write."""
     # 1. Header
     render_header(None)
-    render_header({
-        "id": 1,
-        "external_id": "test_01",
-        "submission_type": "code",
-        "ingested_at": "2026-11-08T00:00:00Z",
-    })
+    render_header(
+        {
+            "id": 1,
+            "external_id": "test_01",
+            "submission_type": "code",
+            "ingested_at": "2026-11-08T00:00:00Z",
+        }
+    )
 
     # 2. Retrieval trace
     render_retrieval_trace(None)
-    render_retrieval_trace({
-        "selected_skills": ["skills/code_quality/v1"],
-        "gate_conditions": ["has_python_files"],
-        "duration_ms": 120,
-    })
+    render_retrieval_trace(
+        {
+            "selected_skills": ["skills/code_quality/v1"],
+            "gate_conditions": ["has_python_files"],
+            "duration_ms": 120,
+        }
+    )
 
     # 3. Findings
     render_findings([])
@@ -166,36 +174,42 @@ def test_render_functions_empty_and_mock_data_no_st_write(
 
     # 5. Passed checks
     render_passed_checks([])
-    render_passed_checks([
-        {
-            "id": 20,
-            "check_id": "cite-doi-resolvable",
-            "skill_capability": "citation-integrity",
-            "verdict": "pass",
-            "confidence": 0.99,
-        }
-    ])
+    render_passed_checks(
+        [
+            {
+                "id": 20,
+                "check_id": "cite-doi-resolvable",
+                "skill_capability": "citation-integrity",
+                "verdict": "pass",
+                "confidence": 0.99,
+            }
+        ]
+    )
 
     # 6. Unsupported evidence
     render_unsupported([])
-    render_unsupported([
-        {
-            "id": 30,
-            "check_id": "cite-no-duplicates",
-            "skill_capability": "citation-integrity",
-            "evidence_text": "phantom reference",
-            "failure_reason": "fuzzy_below_threshold",
-        }
-    ])
+    render_unsupported(
+        [
+            {
+                "id": 30,
+                "check_id": "cite-no-duplicates",
+                "skill_capability": "citation-integrity",
+                "evidence_text": "phantom reference",
+                "failure_reason": "fuzzy_below_threshold",
+            }
+        ]
+    )
 
     # 7. Audit footer
-    render_audit_footer({
-        "model_name": "qwen3:4b",
-        "model_digest": "sha256:1234abcd",
-        "skill_versions": {"citation-integrity": "1.0.0"},
-        "prompt_hashes": {"citation-integrity": "hash123"},
-        "harness_version": "0.1.0",
-    })
+    render_audit_footer(
+        {
+            "model_name": "qwen3:4b",
+            "model_digest": "sha256:1234abcd",
+            "skill_versions": {"citation-integrity": "1.0.0"},
+            "prompt_hashes": {"citation-integrity": "hash123"},
+            "harness_version": "0.1.0",
+        }
+    )
 
 
 def test_render_submission_page_read_only_contract(
@@ -295,19 +309,19 @@ def test_render_submission_page_read_only_contract(
     # Assertions
     # 1. Zero writes called
     for write_fn in KNOWN_WRITE_FUNCTIONS:
-        assert write_fn not in called_repository_funcs, (
-            f"Write function {write_fn} was called during page rendering!"
-        )
+        assert (
+            write_fn not in called_repository_funcs
+        ), f"Write function {write_fn} was called during page rendering!"
 
     # 2. All called repository functions must be in D030_AUTHORIZED_READS
     for called_fn in called_repository_funcs:
-        assert called_fn in D030_AUTHORIZED_READS, (
-            f"Unauthorized repository function {called_fn} was called!"
-        )
+        assert (
+            called_fn in D030_AUTHORIZED_READS
+        ), f"Unauthorized repository function {called_fn} was called!"
 
 
 def test_reviewer_feedback_action_handler_isolated_write(tmp_path: Any) -> None:
-    """Requirement 3: Reviewer feedback writes exactly 1 feedback + 1 audit_log entry via real SQLite fixture."""
+    """Requirement 3: Reviewer feedback writes 1 feedback + 1 audit row via real SQLite fixture."""
     # Create isolated sqlite database
     db_file = tmp_path / "test_feedback.db"
     db_url = f"sqlite:///{db_file}"
