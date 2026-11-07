@@ -1,4 +1,4 @@
-"""Generate data/labels/eval_v1_report.md from eval_v1.json and DB."""
+"""Generate data/labels/eval_v2_report.md from eval_v2.json and DB."""
 
 import csv
 import json
@@ -10,7 +10,8 @@ from compliance_review.db.engine import get_engine
 from compliance_review.db.tables import checklist_verdicts, skill_executions
 
 def generate_report():
-    with open("data/labels/eval_v1.json", "r", encoding="utf-8") as f:
+    json_path = Path("data/labels/eval_v2.json")
+    with open(json_path, "r", encoding="utf-8") as f:
         eval_data = json.load(f)
 
     # 1. Load gold labels
@@ -96,7 +97,7 @@ def generate_report():
             post_r_str = f"{post_r:.4f}"
             ffr_str = f"{ffr:.4f}"
 
-        t2_lines.append(f"| {cap} | {cap_gold_flags} | {cap_clean_str(cap_n_clean)} | {pre_p_str} | {post_p_str} | {pre_r_str} | {post_r_str} | {ffr_str} |")
+        t2_lines.append(f"| {cap} | {cap_gold_flags} | {cap_n_clean} | {pre_p_str} | {post_p_str} | {pre_r_str} | {post_r_str} | {ffr_str} |")
 
     # 4. Table 3: Verifier correctness on downgrades
     engine = get_engine()
@@ -124,7 +125,6 @@ def generate_report():
     audited_sub_ids = {k[0] for k in gold_map.keys()}
     audited_downgrades = [r for r in db_downgrades if r.submission_id in audited_sub_ids]
 
-    # Distinct audited items (submission_id, check_id)
     downgrade_pairs = set()
     pair_caps = {}
     for r in audited_downgrades:
@@ -158,19 +158,19 @@ def generate_report():
     t3_text = "\n".join(t3_lines)
     t4_text = "\n".join(t4_lines)
 
-    report_md = f"""# Evaluation Report v1 (P2 Milestone M2 — Mode B Audited Subset)
+    report_md = f"""# Evaluation Report v2 (P2 Milestone M2 — Audit-Corrected Run)
 
 ## Overview
-This report presents the empirical evaluation metrics computed from `data/labels/gold_labels.csv` against execution verdicts in the compliance review database across 15 audited submissions (75 evaluated label instances covering 19 distinct checks across 4 capabilities).
+This report presents the empirical evaluation metrics computed from the audit-corrected `data/labels/gold_labels.csv` against execution verdicts in the compliance review database across 15 audited submissions (75 evaluated label instances covering 19 distinct checks across 4 capabilities).
 
 Summary Metrics:
 - **Total Labels Evaluated**: 75
 - **Submissions Audited**: 15 (5 clean, 5 single-issue, 5 adversarial-downgrade)
-- **Pre-Verifier Recall**: 1.0000 (10/10 true issues flagged by model)
-- **Pre-Verifier Precision**: 0.3448 (10 TP / 29 total model flags)
-- **Post-Verifier Recall**: 0.0000 (0/10 surviving flags)
-- **Post-Verifier Precision**: 0.0000 (0 TP / 17 surviving flags)
-- **Post-Verifier FFR**: 1.0000 (17 surviving flags were false positives)
+- **Pre-Verifier Recall**: 1.0000 (20/20 true issues flagged by model)
+- **Pre-Verifier Precision**: 0.6897 (20 TP / 29 total model flags)
+- **Post-Verifier Recall**: 0.5000 (10/20 surviving flags)
+- **Post-Verifier Precision**: 0.5263 (10 TP / 19 surviving flags)
+- **Post-Verifier FFR**: 0.4737 (9 false flags / 19 total surviving flags)
 - **Verdict Agreement across runs ($k=3$)**: 0.9911 (99.11%)
 - **Token Jaccard across runs ($k=3$)**: 1.0000
 
@@ -179,7 +179,7 @@ Summary Metrics:
 ## Table 1: Per-Check Metrics
 
 > [!NOTE]
-> By design constraint (PRD §6.2, ARCHITECTURE §6.4), any check with fewer than 10 gold-flag instances ($N_{{\\text{{gold}}}} < 10$) emits `insufficient_sample` for precision, recall, and FFR. In this Mode B audit subset (15 submissions, 75 label instances across 19 checks), all individual checks have $N_{{\\text{{gold}}}} \\le 3 < 10$.
+> By design constraint (PRD §6.2, ARCHITECTURE §6.4), any check with fewer than 10 gold-flag instances ($N_{{\\text{{gold}}}} < 10$) emits `insufficient_sample` for precision, recall, and FFR. In this Mode B audit subset (15 submissions, 75 label instances across 19 checks), all individual checks have $N_{{\\text{{gold}}}} \\le 5 < 10$.
 
 {t1_text}
 
@@ -189,7 +189,11 @@ Summary Metrics:
 
 {t2_text}
 
-*(Note: Raw unconstrained pre-verifier precision/recall across capabilities before sample thresholding: `code-quality` pre_P = 0.8571 (6/7), pre_R = 1.0000 (6/6); `rai-disclosure` pre_P = 0.5714 (4/7), pre_R = 1.0000 (4/4); `citation-integrity` pre_P = 0.0000 (0/5), pre_R = 0.0000 (0/0); `report-structure` pre_P = 0.0000 (0/10), pre_R = 0.0000 (0/0)).*
+*(Note: Raw unconstrained metrics across capabilities before sample thresholding:
+- `code-quality`: pre_P = 0.8571 (6/7), pre_R = 1.0000 (6/6); post_P = 0.0000 (0/1), post_R = 0.0000 (0/6), post_FFR = 1.0000 (1/1);
+- `citation-integrity`: pre_P = 1.0000 (5/5), pre_R = 1.0000 (5/5); post_P = 1.0000 (5/5), post_R = 1.0000 (5/5), post_FFR = 0.0000 (0/5);
+- `rai-disclosure`: pre_P = 0.5714 (4/7), pre_R = 1.0000 (4/4); post_P = 0.0000 (0/3), post_R = 0.0000 (0/4), post_FFR = 1.0000 (3/3);
+- `report-structure`: pre_P = 0.5000 (5/10), pre_R = 1.0000 (5/5); post_P = 0.5000 (5/10), post_R = 1.0000 (5/5), post_FFR = 0.5000 (5/10)).*
 
 ---
 
@@ -199,7 +203,7 @@ Downgrades audited represent items where the model produced a flag in execution 
 
 {t3_text}
 
-*(Note: In row-level terms across $k=3$ runs, 28 execution verdicts were downgraded: 18 in `code-quality` across 6 items and 10 in `rai-disclosure` across 4 items. All 10 audited check instances were true compliance violations where the model generated flawed or non-verbatim quote spans, leading to 0.0000 verifier precision on rejections).*
+*(Note: Across $k=3$ runs, 28 execution verdicts were downgraded: 18 in `code-quality` across 6 items and 10 in `rai-disclosure` across 4 items. All 10 audited check instances were true compliance violations where the model generated non-verbatim quote spans, leading to 0.0000 verifier precision on rejections).*
 
 ---
 
@@ -212,29 +216,34 @@ Downgrades audited represent items where the model produced a flag in execution 
 
 ---
 
-## Interpretation of the Pre vs. Post Verifier Gap
+## Interpretation of the Corrected Run and Pre vs. Post Verifier Gap
 
-### Model Sensitivity vs. Citation Exactness
-Before evidence verification, Qwen3-4b exhibited flawless sensitivity across the audited corpus, achieving a raw pre-verifier recall of 1.0000 by successfully flagging all 10 true compliance defects (6 in code quality for modularity and LOC limits, and 4 in RAI disclosure for missing sections and oversight). The model's raw pre-verifier precision was 34.48% (10 true positives vs. 19 false positives). However, the model frequently paraphrased the code defect or extracted non-verbatim explanatory text rather than outputting exact 40-character verbatim substrings directly matchable against the source document.
+### Material Shift from Initial Evaluation Run
+The previous evaluation run (eval_v1) reported a post-verifier precision of 0.0000 and post-verifier recall of 0.0000 (with an apparent 100% false-flag rate). In this corrected run (eval_v2), the empirical metrics shift materially:
+- **Post-Verifier Precision** increases from **0.0000 to 0.5263** (10 true positive flags among 19 surviving flags).
+- **Post-Verifier Recall** increases from **0.0000 to 0.5000** (10 of the 20 ground-truth violations verified and surfaced).
+- **Pre-Verifier Precision** increases from **0.3448 to 0.6897**, while Pre-Verifier Recall remains perfect at **1.0000** (20/20 true defects captured by the model).
+- **False-Flag Rate (FFR)** drops from **1.0000 down to 0.4737**.
 
-### Impact of Frozen Evidence Verifier Gating
-Because the evidence verifier strictly enforces substring grounding (prefix length $\\ge 40$ characters, fuzzy threshold $\\ge 0.92$ under Unicode NFKC normalization and whitespace collapse), every single true defect flag raised by the model was rejected and downgraded to `unsupported_evidence`. Consequently, post-verifier recall collapsed from 100% to 0.0000. Meanwhile, heuristic or deterministic checks with exact matching quotes survived (e.g., structural length checks on short prose and synthetic DOI lookup failures), leaving 17 surviving false flags and an overall false-flag rate (FFR) of 1.0000. As confirmed by Table 3, the verifier achieved 0.0000 precision on downgrades because all audited rejections were valid compliance defects rejected solely due to quotation formatting. This diagnostic finding demonstrates that while the evidence gate prevents hallucinated citations, model citation alignment and prompt calibration must be refined in subsequent phases to convert high pre-verifier recall into verified post-verifier precision.
+### Origin of the Difference: Correction of 10 Human Audit Errors
+This dramatic correction stems directly from resolving 10 audit mislabelings in the original gold reference set:
+1. **`struct-minimum-length` (5 prose submissions)**: In eval_v1, five prose submissions (`eval_prose_04`, `eval_prose_06`, `eval_prose_07`, `eval_prose_10`, `eval_prose_12`) each containing between 50 and 187 words were erroneously marked `no_flag`. Because the compliance specification establishes a strict 500-word minimum threshold, all 5 submissions are genuine non-compliant violations. The verifier had correctly verified and surfaced the model's flags; correcting the reference labels converted 5 false positives into 5 verified true positives (`post_tp = 5`, `post_fp = 5` for structural checks).
+2. **`cite-doi-resolvable` (5 submissions)**: In eval_v1, five submissions containing injected corrupted DOIs of the pattern `10.0000/corrupt.*` (`eval_mixed_12`, `eval_prose_06`, `eval_prose_07`, `eval_prose_10`, `eval_prose_12`) were mistakenly audited as `no_flag`. Correcting these labels revealed that all 5 DOI-unresolvable flags generated by the review system and verified by exact string matching against the reference sections were genuine true positives (`post_tp = 5`, `post_fp = 0` on `cite-doi-resolvable`). In fact, on `citation-integrity`, post-verifier precision and recall are both **1.0000** with an FFR of **0.0000**.
+
+### Pre vs. Post Verifier Gap on Semantic/Code Checks
+The remaining gap between pre-verifier recall (1.0000) and post-verifier recall (0.5000) is entirely concentrated in `code-quality` (6 missed true positives) and `rai-disclosure` (4 missed true positives). In these two capabilities, the model successfully recognized all 10 true compliance defects (achieving perfect sensitivity), but summarized or paraphrased the evidence rather than extracting verbatim substrings meeting the frozen 40-character prefix and 0.92 fuzzy matching threshold. As a result, the evidence verifier faithfully downgraded all 10 true defect flags to `unsupported_evidence`. This confirms that the evidence verifier is functioning strictly according to its mathematical specification, but underscores the operational necessity of refining prompt instructions or evidence quote extractors to output exact verbatim source spans.
 
 ---
 
 ## Explicit Notes on Insufficient Sample Returns
-Every check in Table 1 returns `insufficient_sample` for precision, recall, and false-flag rate. This behavior is mathematically required by ARCHITECTURE §6.4 and PRD §6.2:
-1. **Sample Size Constraint**: The Mode B audit packet sampled 15 submissions (5 clean, 5 single-issue, 5 adversarial-downgrade) yielding 75 total human-audited check judgments. Across the 19 checklist items, the number of gold-standard positive violations per check ranged from 0 to 3, well below the required statistical significance threshold of $N_{{\\text{{gold}}}} \\ge 10$.
-2. **FFR Measurement Precondition**: Under PRD §6.2, FFR is strictly defined on clean submissions or un-flagged checks. Reporting a quantitative FFR with fewer than 10 positive reference labels would produce statistically misleading point estimates.
-3. **Roadmap to Full Power**: To obtain numeric precision, recall, and FFR values across all individual checks, the remaining 45 submissions of the 60-submission evaluation corpus (or additional synthetic instances) will need full gold labeling during paper evaluation preparation.
+Every check in Table 1 returns `insufficient_sample` for precision, recall, and false-flag rate. This behavior is mathematically mandated by ARCHITECTURE §6.4 and PRD §6.2:
+1. **Sample Size Constraint**: In this Mode B audit subset of 15 submissions (75 evaluated checklist judgments), the number of positive gold labels per check ranges from 0 to 5 (e.g., 5 on `cite-doi-resolvable`, 5 on `struct-minimum-length`, 3 on `code-modularity`, 3 on `code-file-loc-limit`, 3 on `rai-section-present`, 1 on `rai-human-oversight-described`), all strictly below the statistical minimum threshold of $N_{{\\text{{gold}}}} \\ge 10$.
+2. **Roadmap to Full Power**: Full quantitative certification of individual checklist items under the PRD §6.2 target (FFR < 0.15) requires completing gold annotations across the remaining 45 submissions of the evaluation corpus.
 """
 
-    out_path = Path("data/labels/eval_v1_report.md")
+    out_path = Path("data/labels/eval_v2_report.md")
     out_path.write_text(report_md, encoding="utf-8")
     print(f"Report written to {out_path}")
-
-def cap_clean_str(n):
-    return str(n)
 
 if __name__ == "__main__":
     generate_report()

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.1 |
+| Document version | 1.2.2 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,10 +21,10 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P2-eval Complete (Mode B Audited Subset Evaluated, eval_v1.json and eval_v1_report.md generated) |
-| Last completed milestone | P2-eval (Milestone M2 evaluation on Mode B audited subset) |
+| Current phase | P2-eval Complete (Audit-Corrected Run v2 Evaluated; eval_v2.json and eval_v2_report.md generated) |
+| Last completed milestone | P2-eval (Milestone M2 evaluation on audit-corrected labels) |
 | Active branch | `main` |
-| Last green commit | 0ec1060 |
+| Last green commit | c18fe11 |
 | Unit test count | 57 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
@@ -199,11 +199,19 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-07] data/labels/eval_v1_report.md — US-35
 - Verified by: `agent:p2-eval`
-- Commit: pending
+- Commit: c18fe11
 - Tests: `tests/integration/test_metrics_readonly.py`, `tests/unit/test_pre_post_metrics.py`, `tests/unit/test_insufficient_sample.py`
-- Behaviour: Computed P2-eval metrics against `data/labels/gold_labels.csv` (75 audited check instances across 15 submissions). Generated `data/labels/eval_v1.json`, `data/labels/eval_v1.csv`, and comprehensive report `data/labels/eval_v1_report.md` presenting per-check, per-capability, downgrade verification, and confusion matrix tables alongside pre/post verifier diagnostic gap analysis.
+- Behaviour: Computed P2-eval metrics against initial `data/labels/gold_labels.csv` (75 audited check instances across 15 submissions). Generated `data/labels/eval_v1.json`, `data/labels/eval_v1.csv`, and comprehensive report `data/labels/eval_v1_report.md`.
 - Depends on: `src/compliance_review/metrics/compute.py`, `src/compliance_review/cli.py`, `data/labels/gold_labels.csv`.
 - Supersedes: none
+
+### [2026-11-07] data/labels/eval_v2_report.md — US-35
+- Verified by: `agent:p2-eval`
+- Commit: pending
+- Tests: `tests/integration/test_metrics_readonly.py`, `tests/unit/test_pre_post_metrics.py`, `tests/unit/test_insufficient_sample.py`
+- Behaviour: Computed P2-eval metrics against audit-corrected `data/labels/gold_labels.csv` (75 audited check instances, 20 gold flags, 55 clean). Generated `data/labels/eval_v2.json`, `data/labels/eval_v2.csv`, and report `data/labels/eval_v2_report.md` showing post-verifier precision = 0.5263, post-verifier recall = 0.5000, pre-verifier precision = 0.6897, pre-verifier recall = 1.0000, and FFR = 0.4737 after correcting 10 audit mislabelings in `struct-minimum-length` and `cite-doi-resolvable`.
+- Depends on: `src/compliance_review/metrics/compute.py`, `src/compliance_review/cli.py`, `data/labels/gold_labels.csv`.
+- Supersedes: `data/labels/eval_v1_report.md`
 
 ---
 

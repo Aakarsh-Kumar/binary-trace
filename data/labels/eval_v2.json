@@ -1,0 +1,468 @@
+{
+  "summary": {
+    "total_labels": 75,
+    "total_submissions": 15,
+    "overall_post_verifier_precision": 0.5263,
+    "overall_post_verifier_recall": 0.5,
+    "overall_pre_verifier_precision": 0.6897,
+    "overall_pre_verifier_recall": 1.0,
+    "overall_post_verifier_ffr": 0.4737,
+    "overall_consistency_agreement": 0.9911,
+    "overall_consistency_jaccard": 1.0
+  },
+  "capabilities": {
+    "code-quality": {
+      "checks": {
+        "code-error-handling": {
+          "sample_size": 5,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "code-file-loc-limit": {
+          "sample_size": 8,
+          "gold_flags": 3,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 3,
+            "fp": 0,
+            "tn": 5,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5,
+            "fn": 3
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "code-modularity": {
+          "sample_size": 8,
+          "gold_flags": 3,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 3,
+            "fp": 0,
+            "tn": 5,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5,
+            "fn": 3
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "code-pylint-clean": {
+          "sample_size": 5,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "code-ruff-clean": {
+          "sample_size": 6,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 5,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 5,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        }
+      }
+    },
+    "citation-integrity": {
+      "checks": {
+        "cite-claim-supported": {
+          "sample_size": 2,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "cite-context-accurate": {
+          "sample_size": 2,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "cite-doi-resolvable": {
+          "sample_size": 7,
+          "gold_flags": 5,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 5,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 5,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "cite-no-duplicates": {
+          "sample_size": 3,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 3,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 3,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "cite-not-retracted": {
+          "sample_size": 2,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        }
+      }
+    },
+    "rai-disclosure": {
+      "checks": {
+        "rai-human-oversight-described": {
+          "sample_size": 3,
+          "gold_flags": 1,
+          "consistency_agreement": 0.8889,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 1,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 1
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "rai-section-present": {
+          "sample_size": 5,
+          "gold_flags": 3,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 3,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 3
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "rai-sufficiency-judgment": {
+          "sample_size": 4,
+          "gold_flags": 0,
+          "consistency_agreement": 0.9167,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 2,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 2,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "rai-task-named": {
+          "sample_size": 3,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "rai-tool-named": {
+          "sample_size": 2,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 0.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 2,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        }
+      }
+    },
+    "report-structure": {
+      "checks": {
+        "struct-minimum-length": {
+          "sample_size": 5,
+          "gold_flags": 5,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 5,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 5,
+            "fp": 0,
+            "tn": 0,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "struct-required-sections": {
+          "sample_size": 1,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 0,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 0,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "struct-semantic-coherence": {
+          "sample_size": 1,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 0,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 1,
+            "tn": 0,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        },
+        "struct-claim-evidence-alignment": {
+          "sample_size": 3,
+          "gold_flags": 0,
+          "consistency_agreement": 1.0,
+          "consistency_jaccard": 1.0,
+          "pre_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 3,
+            "tn": 0,
+            "fn": 0
+          },
+          "post_confusion_matrix_2x2": {
+            "tp": 0,
+            "fp": 3,
+            "tn": 0,
+            "fn": 0
+          },
+          "pre_verifier_precision": "insufficient_sample",
+          "pre_verifier_recall": "insufficient_sample",
+          "post_verifier_precision": "insufficient_sample",
+          "post_verifier_recall": "insufficient_sample",
+          "post_verifier_ffr": "insufficient_sample"
+        }
+      }
+    }
+  }
+}
