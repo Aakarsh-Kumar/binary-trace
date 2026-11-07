@@ -1,4 +1,4 @@
-"""Deterministic capability gate conforming to ARCHITECTURE.md §6.2 and US-13.
+"""Deterministic capability gate conforming to ARCHITECTURE.md §6.2 (amended by D-028) and US-13.
 
 FROZEN INVARIANT:
 This module MUST NOT import any model module, sentence_transformers, torch, or faiss.
@@ -27,17 +27,50 @@ def determine_capability_set(
     reasons: dict[str, str] = {}
 
     if submission_type == "prose":
-        capabilities["citation-integrity"] = True
-        reasons["citation-integrity"] = "prose submission requires citation integrity check"
-
-        capabilities["report-structure"] = True
-        reasons["report-structure"] = "prose submission requires structural compliance check"
-
-        capabilities["rai-disclosure"] = True
-        reasons["rai-disclosure"] = "prose submission requires AI disclosure check"
-
         capabilities["code-quality"] = False
         reasons["code-quality"] = "code-quality disabled for pure prose submissions"
+
+        prose_text = extracted_data.get("text", "")
+        text_lower = prose_text.lower()
+        word_count = extracted_data.get("word_count", 0)
+
+        # citation-integrity requires bibliography detected per D-028
+        has_bib = (
+            extracted_data.get("references_present", False)
+            or "references" in text_lower
+            or "bibliography" in text_lower
+            or ".bib" in text_lower
+            or ".ris" in text_lower
+        )
+        if has_bib:
+            capabilities["citation-integrity"] = True
+            reasons["citation-integrity"] = "bibliography detected in prose submission"
+        else:
+            capabilities["citation-integrity"] = False
+            reasons["citation-integrity"] = "no bibliography or references detected"
+
+        # report-structure requires prose length >= 500 words per D-028
+        if word_count >= 500:
+            capabilities["report-structure"] = True
+            reasons["report-structure"] = f"prose length {word_count} >= 500 words"
+        else:
+            capabilities["report-structure"] = False
+            reasons["report-structure"] = f"prose length {word_count} < 500 words"
+
+        # rai-disclosure requires disclosure heading or DISCLOSURE.md per D-028
+        has_disclosure = (
+            extracted_data.get("disclosure_present", False)
+            or extracted_data.get("has_disclosure_file", False)
+            or "disclosure" in text_lower
+            or "ai use" in text_lower
+            or "responsible ai" in text_lower
+        )
+        if has_disclosure:
+            capabilities["rai-disclosure"] = True
+            reasons["rai-disclosure"] = "AI disclosure section or DISCLOSURE.md detected"
+        else:
+            capabilities["rai-disclosure"] = False
+            reasons["rai-disclosure"] = "no disclosure section or DISCLOSURE.md present"
 
     elif submission_type == "code":
         capabilities["code-quality"] = True
@@ -63,7 +96,8 @@ def determine_capability_set(
 
         # citation-integrity requires bibliography detected
         has_bib = (
-            "references" in text_lower
+            extracted_data.get("references_present", False)
+            or "references" in text_lower
             or "bibliography" in text_lower
             or ".bib" in text_lower
             or ".ris" in text_lower
@@ -85,7 +119,8 @@ def determine_capability_set(
 
         # rai-disclosure requires disclosure heading or DISCLOSURE.md
         has_disclosure = (
-            extracted_data.get("has_disclosure_file", False)
+            extracted_data.get("disclosure_present", False)
+            or extracted_data.get("has_disclosure_file", False)
             or "disclosure" in text_lower
             or "ai use" in text_lower
             or "responsible ai" in text_lower

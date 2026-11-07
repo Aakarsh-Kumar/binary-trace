@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.5 |
+| Document version | 1.2.6 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P3 (Milestone M3 Retrieval Evaluation - Roadblock Recorded) |
 | Last completed milestone | P2-eval (Milestone M2 evaluation on audit-corrected labels) |
 | Active branch | `main` |
-| Last green commit | 879438e |
+| Last green commit | 77d2fd7 |
 | Unit test count | 59 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
@@ -215,11 +215,19 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] scripts/compute_retrieval_metrics.py — US-18, D-027
 - Verified by: `agent:p3`
-- Commit: pending
+- Commit: a43acda
 - Tests: `tests/unit/test_retrieval_metrics.py` (formula correctness, HSR@K sensitivity, read-only contract)
 - Behaviour: Computes capability recall, version precision@1, over-retrieval rate, HSR@K risk exposure, and retrieval latency distribution across 60 evaluation submissions against gold standard `data/labels/CORPUS_COMPOSITION.md`. Generates `data/labels/retrieval_eval_v1.json` and Markdown report `data/labels/retrieval_eval_v1.md` with 4 evaluation tables.
 - Depends on: `data/labels/CORPUS_COMPOSITION.md`, `retrieval_events`, `skills/`.
 - Supersedes: none
+
+### [2026-11-08] src/compliance_review/retrieval/capability_gate.py, ingestion/orchestrator.py — US-13, D-028
+- Verified by: `agent:p3-fix`
+- Commit: pending
+- Tests: `tests/unit/test_gate_purity.py`
+- Behaviour: Aligns prose gating rules with mixed gating rules per D-028: report-structure requires >= 500 words, rai-disclosure requires disclosure present, citation-integrity requires references present. Mixed ingestion prefers primary non-disclosure prose files and scans all prose files for bibliography signals.
+- Depends on: pure python, standard library only.
+- Supersedes: US-13 (2026-11-04)
 
 ---
 

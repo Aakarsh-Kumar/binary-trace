@@ -13,13 +13,30 @@ def test_gate_purity_no_forbidden_imports() -> None:
             name not in capability_gate.__dict__
         ), f"Forbidden module '{name}' imported in capability_gate"
 
-    # Verify deterministic behavior
+    # Verify deterministic behavior under D-028
     caps, reasons = capability_gate.determine_capability_set(
         "prose", {"text": "Hello world", "word_count": 2}
     )
-    assert caps["citation-integrity"] is True
+    assert caps["citation-integrity"] is False
+    assert caps["report-structure"] is False
+    assert caps["rai-disclosure"] is False
     assert caps["code-quality"] is False
     assert "code-quality disabled" in reasons["code-quality"]
+
+    # Verify prose with preconditions satisfied
+    caps_full, _ = capability_gate.determine_capability_set(
+        "prose",
+        {
+            "text": "Hello world\n\nReferences: 10.1234\n\nDisclosure: AI used\n" + "word " * 500,
+            "word_count": 510,
+            "references_present": True,
+            "disclosure_present": True,
+        },
+    )
+    assert caps_full["citation-integrity"] is True
+    assert caps_full["report-structure"] is True
+    assert caps_full["rai-disclosure"] is True
+    assert caps_full["code-quality"] is False
 
 
 def test_gate_rules_for_code() -> None:

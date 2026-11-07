@@ -20,17 +20,23 @@ def parse_submission_content(source: Path, sub_type: str) -> tuple[str, dict[str
         if suffix in [".md", ".txt"]:
             text, sha256, wc = ingest_markdown(source)
             extracted_data.update({"text": text, "word_count": wc})
-            return sha256, extracted_data
         elif suffix == ".pdf":
             text, sha256, pages = ingest_pdf(source)
             extracted_data.update({"text": text, "pages": pages, "word_count": len(text.split())})
-            return sha256, extracted_data
         elif suffix == ".docx":
             text, sha256, wc = ingest_docx(source)
             extracted_data.update({"text": text, "word_count": wc})
-            return sha256, extracted_data
         else:
             raise IngestError(f"Unsupported prose format: {suffix}")
+
+        t_lower = text.lower()
+        extracted_data["references_present"] = (
+            "references" in t_lower
+            or "bibliography" in t_lower
+            or ".bib" in t_lower
+            or ".ris" in t_lower
+        )
+        return sha256, extracted_data
 
     elif sub_type == "code":
         files, sha256, loc = ingest_repo(source)
@@ -48,8 +54,11 @@ def parse_submission_content(source: Path, sub_type: str) -> tuple[str, dict[str
             list(source.glob("*.pdf")) + list(source.glob("*.md")) + list(source.glob("*.docx"))
         )
         prose_text = ""
+        all_prose_texts: list[str] = []
         if prose_files:
-            p_file = prose_files[0]
+            # Prefer non-DISCLOSURE files (e.g. paper.md) as primary prose
+            primary_files = [f for f in prose_files if f.name.upper() != "DISCLOSURE.MD"]
+            p_file = primary_files[0] if primary_files else prose_files[0]
             if p_file.suffix == ".pdf":
                 p_text, _, pages = ingest_pdf(p_file)
                 extracted_data["pages"] = pages
@@ -59,8 +68,31 @@ def parse_submission_content(source: Path, sub_type: str) -> tuple[str, dict[str
                 p_text, _, _ = ingest_markdown(p_file)
             prose_text = p_text
 
+            for pf in prose_files:
+                if pf.suffix in [".md", ".txt"]:
+                    t, _, _ = ingest_markdown(pf)
+                    all_prose_texts.append(t)
+                elif pf.suffix == ".docx":
+                    t, _, _ = ingest_docx(pf)
+                    all_prose_texts.append(t)
+                elif pf.suffix == ".pdf":
+                    t, _, _ = ingest_pdf(pf)
+                    all_prose_texts.append(t)
+
         extracted_data["text"] = prose_text
         extracted_data["word_count"] = len(prose_text.split())
+
+        # Check for bibliography or references in directory or in all prose texts
+        bib_files = list(source.glob("*.bib")) + list(source.glob("*.ris"))
+        combined_prose = "\n".join(all_prose_texts).lower()
+        has_bib = (
+            len(bib_files) > 0
+            or "references" in combined_prose
+            or "bibliography" in combined_prose
+            or ".bib" in combined_prose
+            or ".ris" in combined_prose
+        )
+        extracted_data["references_present"] = has_bib
 
         # Look for code
         try:
@@ -71,9 +103,17 @@ def parse_submission_content(source: Path, sub_type: str) -> tuple[str, dict[str
             extracted_data["files"] = {}
             extracted_data["loc"] = 0
 
-        # Check for disclosure file
-        if (source / "DISCLOSURE.md").exists():
+        # Check for disclosure file or disclosure heading across prose files
+        has_disc_file = (source / "DISCLOSURE.md").exists() or (source / "disclosure.md").exists()
+        if has_disc_file:
             extracted_data["has_disclosure_file"] = True
+        if (
+            has_disc_file
+            or "disclosure" in combined_prose
+            or "ai use" in combined_prose
+            or "responsible ai" in combined_prose
+        ):
+            extracted_data["disclosure_present"] = True
 
         combined_hash_input = prose_text + str(extracted_data.get("files", {}))
         import hashlib
