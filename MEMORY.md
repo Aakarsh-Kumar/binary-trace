@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.0 |
+| Document version | 1.3.1 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -24,8 +24,8 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P3 closed / Ready for P4 (Milestone M3 achieved) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 54aed66 |
-| Unit test count | 62 |
+| Last green commit | 37383b0 |
+| Unit test count | 64 |
 | Integration test count | 9 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
@@ -247,10 +247,18 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ### [2026-11-08] src/compliance_review/db/repository.py — US-29, US-30, US-33, D-030
 - Verified by: `agent:p4`
-- Commit: pending
+- Commit: 37383b0
 - Tests: `tests/unit/test_repository_readonly.py`
 - Behaviour: Implements read-only query helpers for dashboard rendering: `get_retrieval_event_for_submission` (ORDER BY id DESC LIMIT 1), `get_skill_executions_for_submission`, `get_verdicts_for_execution`, `get_verdicts_for_submission`, `get_evidence_verifications_for_verdict`, `get_reviewer_feedback_for_submission`, and `list_submissions`. Uses SQLAlchemy Core select() only.
 - Depends on: `src/compliance_review/db/tables.py`, `src/compliance_review/db/engine.py`.
+- Supersedes: none
+
+### [2026-11-08] src/compliance_review/dashboard/agreement.py — US-29, D-031
+- Verified by: `agent:p4`
+- Commit: pending
+- Tests: `tests/unit/test_dashboard_agreement_source.py`
+- Behaviour: Implements cached agreement computation wrapper delegating directly to `harness/k_run.compute_agreement` with `@st.cache_data(ttl=60)`. Proves dashboard does not compute agreement inline.
+- Depends on: `src/compliance_review/harness/k_run.py`, `streamlit`.
 - Supersedes: none
 
 ---

@@ -74,6 +74,10 @@ def compute_k_run_agreement(
     return agreement_metrics
 
 
+# Alias per D-031
+compute_agreement = compute_k_run_agreement
+
+
 def run_single_capability_execution(
     capability: str,
     version: str,
