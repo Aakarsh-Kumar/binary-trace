@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.8 |
+| Document version | 1.2.9 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -472,6 +472,34 @@ This file is the project's persistent memory. It is the first file an agent read
 - Context: In P3, latency was recorded as total review duration (p50 = 24,730 ms), conflating model execution with retrieval latency. The target (p50 <= 1500 ms) measures retrieval efficiency as specified in PRD §6.1.
 - Documents amended: ARCHITECTURE.md §4.2
 - Reversible: no
+
+### D-030: Read-only query helpers in db/repository.py
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Add read-only query helpers to db/repository.py: get_submission_by_external_id, get_submission_by_id, get_retrieval_event_for_submission (ORDER BY id DESC LIMIT 1), get_skill_executions_for_submission, get_verdicts_for_execution, get_verdicts_for_submission, get_evidence_verifications_for_verdict, get_reviewer_feedback_for_submission, list_submissions (paged for sidebar). All use SQLAlchemy Core SELECT only. No direct SQL or INSERT/UPDATE/DELETE.
+- Context: Required for dashboard rendering while enforcing read-only contract. get_retrieval_event_for_submission picks newest row after P3-fix refresh.
+- Documents amended: ARCHITECTURE.md §3, §10.4
+- Reversible: no
+
+### D-031: Agreement values in dashboard from harness/k_run.compute_k_run_agreement
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Agreement values in the dashboard MUST come from harness/k_run.compute_k_run_agreement() — NOT recomputed inline. The dashboard calls the function and caches via st.cache_data(ttl=60).
+- Context: Prevents divergence between dashboard display and harness evaluation metrics.
+- Documents amended: ARCHITECTURE.md §10.4
+- Reversible: no
+
+### D-032: Reviewer actions write through db/repository.py::record_reviewer_feedback ONLY
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Reviewer action handler writes through db/repository.py::record_reviewer_feedback ONLY. One feedback row + one audit_log row per action, one transaction.
+- Context: Preserves audit logging and schema invariants for all reviewer overrides.
+- Documents amended: ARCHITECTURE.md §10.4
+- Reversible: no
+
+### D-033: Defer dashboard pages 02_skill_library and 03_metrics to camera-ready
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Dashboard pages 02_skill_library and 03_metrics are deferred to camera-ready. Implement them as stubs with a st.info() message.
+- Context: Focuses P4-code entirely on the Submission review page (seven frozen sections).
+- Documents amended: ARCHITECTURE.md §10.1
+- Reversible: yes
 
 ---
 

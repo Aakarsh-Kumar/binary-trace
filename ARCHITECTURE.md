@@ -116,7 +116,7 @@ compliance-review/
 │       │   ├── __init__.py
 │       │   ├── engine.py                 # SQLAlchemy Engine factory
 │       │   ├── tables.py                 # SQLAlchemy Core Table definitions ONLY
-│       │   └── repository.py             # insert/select helpers; the ONLY writer to DB
+│       │   └── repository.py             # insert/select helpers; the ONLY writer to DB; D-030 read helpers
 │       ├── skills/
 │       │   ├── __init__.py
 │       │   ├── schema.py                 # SkillFrontmatter, ChecklistItem (pydantic)
@@ -572,11 +572,11 @@ Exit codes: `0` success · `1` validation/ingestion · `2` runtime · `3` invari
 
 ### 10.1 Pages (three only)
 
-| Page | File | Reads |
-|---|---|---|
-| Submission review | `pages/01_submission.py` | `submissions`, `retrieval_events`, `skill_executions`, `checklist_verdicts`, `evidence_verifications` |
-| Skill library | `pages/02_skill_library.py` | `skills/` on disk + `skill_executions` |
-| Metrics | `pages/03_metrics.py` | `metrics/compute.py` output cached to `data/cache/` |
+| Page | File | Reads | Status |
+|---|---|---|---|
+| Submission review | `pages/01_submission.py` | `submissions`, `retrieval_events`, `skill_executions`, `checklist_verdicts`, `evidence_verifications` | Active |
+| Skill library | `pages/02_skill_library.py` | `skills/` on disk + `skill_executions` | Deferred to camera-ready (D-033) |
+| Metrics | `pages/03_metrics.py` | `metrics/compute.py` output cached to `data/cache/` | Deferred to camera-ready (D-033) |
 
 ### 10.2 Submission page layout (frozen order)
 
@@ -596,8 +596,25 @@ Exit codes: `0` success · `1` validation/ingestion · `2` runtime · `3` invari
 4. **Confusion Matrices** — 2x2 confusion matrix display per check
 5. **Retrieval & System Telemetry** — HSR@K, execution error rate, latency percentiles
 
-### 10.4 Forbidden in dashboard code
+### 10.4 Repository Helpers & Dashboard Invariants
 
+D-030: All reads from the database MUST go through read-only helpers in `db/repository.py`:
+- `get_submission_by_external_id(external_id)`
+- `get_submission_by_id(submission_id)`
+- `get_retrieval_event_for_submission(submission_id)` (ORDER BY id DESC LIMIT 1 to pick newest row)
+- `get_skill_executions_for_submission(submission_id)`
+- `get_verdicts_for_execution(execution_id)`
+- `get_verdicts_for_submission(submission_id)`
+- `get_evidence_verifications_for_verdict(verdict_id)`
+- `get_reviewer_feedback_for_submission(submission_id)`
+- `list_submissions(limit, offset)` (paged for sidebar)
+All use SQLAlchemy Core SELECT only. No direct SQL or INSERT/UPDATE/DELETE.
+
+D-031: Agreement values in the dashboard MUST come from `harness/k_run.compute_k_run_agreement()` — NOT recomputed inline. The dashboard calls the function and caches via `st.cache_data(ttl=60)`.
+
+D-032: Reviewer action handler writes through `db/repository.py::record_reviewer_feedback` ONLY. One feedback row + one audit_log row per action, one transaction.
+
+Forbidden in dashboard code:
 - `st.write()` for anything except debug to hidden expander
 - Direct SQL (all reads through `db/repository.py`)
 - Any recomputation of agreement, FFR, or precision
