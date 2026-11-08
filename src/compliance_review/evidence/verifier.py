@@ -7,9 +7,12 @@ Thresholds and normalization are frozen and MUST NOT be modified:
   - normalization = NFKC + whitespace collapse + casefold
 """
 
+from __future__ import annotations
+
 import difflib
 import re
 import unicodedata
+from pathlib import Path
 from typing import Any, NamedTuple
 
 PREFIX_LEN: int = 40
@@ -51,17 +54,71 @@ def parse_location_grammar(location: str) -> tuple[str, Any] | None:
     return None
 
 
-def resolve_source_span(kind: str, groups: Any, submission_data: dict[str, Any]) -> str:
+def resolve_source_span(
+    location: str | None = None,
+    submission: Any = None,
+    submission_data: dict[str, Any] | None = None,
+    *,
+    evidence_location: str | None = None,
+    kind: str | None = None,
+    groups: Any = None,
+) -> str:
     """Resolve the source text span corresponding to the location."""
+    data: dict[str, Any] | None = submission_data
+
+    # Handle legacy 3-positional-arg call: resolve_source_span(kind, groups, submission_data)
+    if kind is None and groups is None:
+        if (
+            location is not None
+            and submission is not None
+            and isinstance(submission, tuple | list)
+        ):
+            kind = str(location)
+            groups = submission
+            data = submission_data or {}
+        else:
+            loc = evidence_location or location
+            if not loc:
+                return ""
+            parsed = parse_location_grammar(loc)
+            if not parsed:
+                return ""
+            kind, groups = parsed
+            if data is None:
+                if isinstance(submission, dict) and (
+                    "pages" in submission or "files" in submission or "text" in submission
+                ):
+                    data = submission
+                elif submission is not None:
+                    source_path = (
+                        submission.get("source_path")
+                        if isinstance(submission, dict)
+                        else getattr(submission, "source_path", None)
+                    )
+                    sub_type = (
+                        submission.get("submission_type", "prose")
+                        if isinstance(submission, dict)
+                        else getattr(submission, "submission_type", "prose")
+                    )
+                    if source_path:
+                        from compliance_review.ingestion.orchestrator import (
+                            parse_submission_content,
+                        )
+
+                        _, data = parse_submission_content(Path(source_path), sub_type)
+
+    if not data or not kind or not groups:
+        return ""
+
     if kind == "page":
         page_num = int(groups[0])
-        pages = submission_data.get("pages", {})
-        return str(pages.get(page_num, submission_data.get("text", "")))
+        pages = data.get("pages", {})
+        return str(pages.get(page_num, data.get("text", "")))
 
     elif kind == "file":
         rel_path, line_no_str = groups[0], groups[1]
         line_no = int(line_no_str)
-        files = submission_data.get("files", {})
+        files = data.get("files", {})
         content = files.get(rel_path, "")
         lines = content.splitlines()
         if 1 <= line_no <= len(lines):
@@ -70,17 +127,14 @@ def resolve_source_span(kind: str, groups: Any, submission_data: dict[str, Any])
 
     elif kind == "section":
         slug = groups[0].lower()
-        full_text = str(submission_data.get("text", ""))
+        full_text = str(data.get("text", ""))
         idx = full_text.lower().find(slug)
         if idx != -1:
             return full_text[idx : idx + 1000]
         return full_text
 
-    elif kind == "table":
-        return str(submission_data.get("text", ""))
-
-    elif kind == "bbox":
-        return str(submission_data.get("text", ""))
+    elif kind in ("table", "bbox"):
+        return str(data.get("text", ""))
 
     return ""
 

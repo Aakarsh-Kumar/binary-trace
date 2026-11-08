@@ -1,7 +1,6 @@
 """Submission Review Streamlit page conforming to ARCHITECTURE.md §10.2 (seven frozen sections)."""
 
 import json
-from pathlib import Path
 from typing import Any
 
 import streamlit as st
@@ -20,6 +19,7 @@ from compliance_review.dashboard.queries import (
     cached_list_submissions,
 )
 from compliance_review.db.repository import record_reviewer_feedback
+from compliance_review.evidence.verifier import resolve_source_span
 from compliance_review.skills.loader import load_all_skills
 
 # Safe st.table wrapper to guard against pyarrow / numpy 1.x ABI incompatibilities
@@ -68,44 +68,56 @@ def get_check_questions_map() -> dict[tuple[str, str], str]:
     return q_map
 
 
-def extract_context_lines(source_path_str: str, location: str | None, window: int = 5) -> str:
+def extract_context_lines(
+    source_path_str: str,
+    location: str | None,
+    window: int = 5,
+    submission: Any = None,
+    evidence_text: str | None = None,
+) -> str:
     """Extract context lines around an evidence location for click-through viewer."""
     if not location:
         return "(no location specified)"
     try:
-        source_path = Path(source_path_str)
-        target_file: Path | None = None
-        target_line: int | None = None
+        sub = submission
+        if sub is None:
+            sub = {
+                "source_path": source_path_str,
+                "submission_type": (
+                    "prose"
+                    if (".pdf" in source_path_str or ".md" in source_path_str)
+                    else "code"
+                ),
+            }
 
-        # Parse line number if present
+        resolved_span = resolve_source_span(evidence_location=location, submission=sub)
+        if not resolved_span:
+            return f"(no context found for location {location})"
+
+        lines = resolved_span.splitlines()
+        if not lines:
+            return "(source content is empty)"
+
+        target_line: int | None = None
         loc_str = location.strip()
-        if ":" in loc_str:
+        if loc_str.startswith("file:") and ":" in loc_str:
             parts = loc_str.split(":")
             if parts[-1].isdigit():
                 target_line = int(parts[-1])
-            if len(parts) >= 2 and parts[0] not in ("line", "lines", "page"):
-                cand_file = source_path / parts[0] if source_path.is_dir() else source_path
-                if cand_file.exists():
-                    target_file = cand_file
 
-        if target_file is None:
-            if source_path.is_file():
-                target_file = source_path
-            elif source_path.is_dir():
-                cand_md = list(source_path.glob("*.md"))
-                cand_py = list(source_path.glob("*.py"))
-                target_file = cand_md[0] if cand_md else (cand_py[0] if cand_py else None)
-
-        if not target_file or not target_file.exists():
-            return f"(source file {target_file} not found for location {location})"
-
-        lines = target_file.read_text(encoding="utf-8", errors="replace").splitlines()
-        if not lines:
-            return "(source file is empty)"
+        if target_line is None and evidence_text:
+            norm_ev = " ".join(evidence_text.split()).lower()
+            if norm_ev:
+                for idx, line in enumerate(lines):
+                    norm_line = " ".join(line.split()).lower()
+                    if norm_ev[:30] in norm_line or (
+                        len(norm_line) > 15 and norm_line in norm_ev
+                    ):
+                        target_line = idx + 1
+                        break
 
         if target_line is None:
-            # Show first 15 lines if no line number was parsed
-            snippet = lines[:15]
+            snippet = lines[:20]
             return "\n".join(f"{i + 1:4d} | {line}" for i, line in enumerate(snippet))
 
         start = max(0, target_line - window - 1)
@@ -271,8 +283,14 @@ def render_findings(
 
                 # Click-through location viewer (±5 lines around)
                 with st.expander(f"📍 Location Context: `{evidence_location}`", expanded=False):
-                    context = extract_context_lines(source_path_str, evidence_location, window=5)
-                    st.code(context, language="python" if ".py" in source_path_str else "markdown")
+                    context = extract_context_lines(
+                        source_path_str=source_path_str,
+                        location=evidence_location,
+                        window=5,
+                        submission=submission,
+                        evidence_text=evidence_text,
+                    )
+                    st.code(context, language=None)
 
                 # Action buttons (Approve / Override / Request re-run)
                 recorded_fb = feedback_by_verdict.get(v_id)

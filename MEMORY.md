@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.7 |
+| Document version | 1.2.8 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -608,6 +608,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: ARCHITECTURE.md §2.5, §3, skills/citation-integrity/v2/SKILL.md
 - Reversible: yes
 
+### D-043: Location context resolver integration
+- Date: 2026-11-08 · Decided by: human:arch / agent:p4.7-hotfix
+- Decision: Expose `resolve_source_span` in `evidence/verifier.py` to accept high-level `(evidence_location, submission)` inputs and resolve parsed spans across prose/pdf/code (Option a). Update dashboard `01_submission.py` to use `resolve_source_span` instead of raw file reading.
+- Context: Prevents PDF binary bytes (`%PDF-1.5`) from being displayed in Location Context expander; ensures dashboard displays exact parsed text seen by the verifier.
+- Documents amended: ARCHITECTURE.md §3, MEMORY.md §6
+- Reversible: yes
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
@@ -654,6 +661,16 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.5-hotfix`
 - Commits: 9ed1d0e, 0de71ae
+
+### TF-005: manual streamlit render of Location Context on PDF upload
+- Date: 2026-11-08
+- Test: manual streamlit render of Location Context on PDF upload
+- Error: viewer showed %PDF-1.5 and PDF objects instead of extracted text
+- Cause: dashboard viewer read raw file bytes; verifier used parsed text
+- Resolution: exposed shared source resolver in evidence/verifier.py; both components now use the same extraction path
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.7-hotfix`
+- Commits: pending
 
 ---
 
