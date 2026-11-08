@@ -116,3 +116,24 @@ def test_real_render_pilot_submission_shows_dash_latency() -> None:
 
     # Should execute and display caption with dash latency
     submission_page.render_retrieval_trace(mock_retrieval, mock_pilot_sub)
+
+
+def test_skill_library_renders_without_exception() -> None:
+    """Verify Skill Library page renders via AppTest and direct call with no exceptions."""
+    at = AppTest.from_file("src/compliance_review/dashboard/pages/02_skill_library.py")
+    at.run()
+    assert not at.exception, f"Skill library AppTest raised: {at.exception}"
+
+    skill_lib_module = importlib.import_module("compliance_review.dashboard.pages.02_skill_library")
+    skill_lib_module.render_skill_library()
+
+
+def test_metrics_renders_without_exception() -> None:
+    """Verify Metrics page renders via AppTest and direct call with no exceptions."""
+    at = AppTest.from_file("src/compliance_review/dashboard/pages/03_metrics.py")
+    at.run()
+    assert not at.exception, f"Metrics AppTest raised: {at.exception}"
+
+    metrics_module = importlib.import_module("compliance_review.dashboard.pages.03_metrics")
+    metrics_module.render_metrics_page()
+
