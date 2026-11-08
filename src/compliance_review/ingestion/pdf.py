@@ -1,6 +1,7 @@
 """PDF ingestion using PyMuPDF conforming to ARCHITECTURE.md §2.5 and US-01."""
 
 import hashlib
+import re
 from pathlib import Path
 
 import pymupdf  # type: ignore[import-untyped]  # reason: pymupdf ships without bundled typed marker
@@ -28,7 +29,23 @@ def ingest_pdf(file_path: Path | str) -> tuple[str, str, dict[int, str]]:
 
     for page_idx in range(len(doc)):
         page = doc[page_idx]
-        page_text = normalize_text(page.get_text())
+        raw_text = page.get_text()
+
+        # Common page metadata patterns to strip (D-042)
+        # Strips running headers, footers, bare page numbers, preprints, and isolated email lines
+        cleaned_text = raw_text
+        patterns = [
+            r"^Page \d+ of \d+.*$",
+            r"^Page \d+$",
+            r"^\d+$",
+            r"^\d+\s*$",
+            r"^Preprint\.? Submitted to.*$",
+            r"^\s*\S+@\S+\.\S+\s*$",
+        ]
+        for pat in patterns:
+            cleaned_text = re.sub(pat, "", cleaned_text, flags=re.MULTILINE)
+
+        page_text = normalize_text(cleaned_text)
         pages[page_idx + 1] = page_text
         full_text_parts.append(page_text)
 
