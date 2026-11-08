@@ -57,7 +57,7 @@ CAPABILITY TO EVALUATE: {capability}
 SKILL VERSION: {version}
 
 CHECKLIST ITEMS TO EVALUATE:
-{checklist_formatted}
+{checklist_formatted}{citation_guidance}
 
 SUBMISSION CONTEXT ({submission_type}):
 {type_hint}
@@ -66,6 +66,33 @@ SUBMISSION CONTEXT ({submission_type}):
 
 Evaluate all listed checklist items. Output the final JSON object:
 """
+
+CITATION_CHECK_GUIDANCE = """
+CITATION EVIDENCE REQUIREMENTS:
+For check "cite-no-duplicates":
+  If verdict is "flag":
+    - evidence_text MUST be the full text of ONE duplicated bibliography
+      entry, copied verbatim. It MUST start with a reference marker like
+      "[1]", "1.", or a recognized author surname followed by a year.
+    - Do NOT quote page headers, footers, page numbers, running titles,
+      or anything outside a bibliography entry.
+    - If you cannot find two identical or near-identical bibliography
+      entries, set verdict to "pass" with confidence >= 0.9.
+  If verdict is "pass" or "not_applicable":
+    - evidence_text may be empty.
+
+For check "cite-doi-resolvable":
+  If verdict is "flag":
+    - evidence_text MUST quote the exact line containing the unresolvable DOI.
+  If verdict is "pass" or "not_applicable":
+    - evidence_text may be empty.
+
+For check "cite-not-retracted":
+  If verdict is "flag":
+    - evidence_text MUST quote the retraction notice line or the retracted
+      bibliography entry line.
+  If verdict is "pass" or "not_applicable":
+    - evidence_text may be empty."""
 
 RETRY_PROMPT_TEMPLATE = """The previous output failed JSON or schema validation:
 ERROR: {validation_error}
@@ -111,12 +138,18 @@ def build_evaluation_prompt(
         if submission_type in ("prose", "pdf", "disclosure_section")
         else "NOTE: This is a code repository. Use location 'file:<relative_path>:<line_number>'."
     )
+    citation_guidance = (
+        f"\n\n{CITATION_CHECK_GUIDANCE}"
+        if capability == "citation-integrity"
+        else ""
+    )
     return CAPABILITY_REVIEW_PROMPT_TEMPLATE.format(
         system_instruction=SYSTEM_INSTRUCTION,
         schema_description=JSON_SCHEMA_DESCRIPTION,
         capability=capability,
         version=version,
         checklist_formatted=checklist_str,
+        citation_guidance=citation_guidance,
         submission_type=submission_type,
         type_hint=type_hint,
         submission_text=truncated_text,
