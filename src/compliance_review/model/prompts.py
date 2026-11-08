@@ -17,14 +17,14 @@ JSON_SCHEMA_DESCRIPTION = """Your output MUST be a JSON object with this exact s
       "severity": "low" | "medium" | "high" | "critical",
       "evidence_text": "<verbatim quotation from submission, 20-200 chars, or null>",
       "evidence_location": "<exact location grammar or null>",
-      "confidence": 1.0
+      "confidence": 0.87
     }
   ]
 }
 
 CRITICAL RULES:
 1. "confidence" is MANDATORY on EVERY verdict (including pass and not_applicable).
-   It MUST be a bare float between 0.0 and 1.0 (e.g. 1.0 or 0.95).
+   It MUST be a bare float between 0.0 and 1.0 (e.g. 0.87 or 0.95).
    Never omit confidence, never enclose it in quotes, and never prefix it with colons.
 2. When verdict is 'flag', evidence_text and evidence_location are MANDATORY:
    - evidence_text MUST be a verbatim substring directly copied from the submission.
@@ -44,7 +44,7 @@ CRITICAL RULES:
 5. When verdict is 'pass' or 'not_applicable' and no span is cited:
    - set "evidence_text": null
    - set "evidence_location": null
-   - set "confidence": 1.0
+6. Assign a confidence in [0.5, 0.99] that reflects how clearly the evidence supports the verdict. Only use values above 0.95 when the evidence is a literal match.
 """
 
 CAPABILITY_REVIEW_PROMPT_TEMPLATE = """{system_instruction}
