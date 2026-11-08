@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.6 |
+| Document version | 1.2.7 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,12 +21,12 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4-code gate closed — ready for P4-pilot |
+| Current phase | P4.5-hotfix closed — ready for P4.6 sidebar uploader |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 434fbf7 |
+| Last green commit | 0de71ae |
 | Unit test count | 64 |
-| Integration test count | 16 |
+| Integration test count | 18 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -621,6 +621,17 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.5`
 - Commits: none (informational diagnosis)
+
+### TF-004: manual streamlit render of 02_skill_library.py
+- Date: 2026-11-08
+- Test: manual streamlit render of 02_skill_library.py
+- Error: StreamlitAPIException: Expanders may not be nested
+- Suspected cause: Line 99 of 02_skill_library.py opened st.expander inside the version expander. Existing unit tests mocked Streamlit runtime and did not exercise the real nesting rule.
+- Alternatives considered: Tabs or popover inside expander — rejected (Streamlit limits nested containers).
+- Resolution: Replaced inner expander with inline st.caption and st.code blocks for each checklist item's evidence requirement. Added AppTest real-render tests in tests/integration/test_dashboard_real_render.py to catch UI container violations automatically.
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.5-hotfix`
+- Commits: 9ed1d0e, 0de71ae
 
 ---
 
