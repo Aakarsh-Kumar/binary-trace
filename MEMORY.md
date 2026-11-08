@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P4.7-fix (revert v2 checklist to eval_v2 baseline, unify location context) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 6083c46 |
+| Last green commit | ac5f43a |
 | Unit test count | 70 |
 | Integration test count | 19 |
 | Skills at `eval_status: active` | 0 |
@@ -687,7 +687,7 @@ This file is the project's persistent memory. It is the first file an agent read
 - Fix: Reverted both v2 SKILL.md checklists to e8be242 baseline, keeping only D-042's cite-no-duplicates evidence_requirement. Unified render_findings and render_unsupported to call resolve_source_span directly.
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-fix`
-- Commits: 1d3906e
+- Commits: 1d3906e, ac5f43a
 
 ---
 
