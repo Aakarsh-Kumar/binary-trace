@@ -687,7 +687,7 @@ This file is the project's persistent memory. It is the first file an agent read
 - Fix: Reverted both v2 SKILL.md checklists to e8be242 baseline, keeping only D-042's cite-no-duplicates evidence_requirement. Unified render_findings and render_unsupported to call resolve_source_span directly.
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-fix`
-- Commits: pending
+- Commits: 1d3906e
 
 ---
 

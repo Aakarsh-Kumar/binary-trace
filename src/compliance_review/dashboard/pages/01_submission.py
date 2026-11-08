@@ -228,7 +228,6 @@ def render_findings(
 
     q_map = get_check_questions_map()
     sub_id = submission["id"] if submission else 0
-    source_path_str = submission.get("source_path", "") if submission else ""
 
     feedback_by_verdict: dict[int, dict[str, Any]] = {}
     if existing_feedback:
@@ -281,16 +280,16 @@ def render_findings(
                 st.markdown("**Evidence Quote:**")
                 st.code(evidence_text if evidence_text else "(empty evidence text)")
 
-                # Click-through location viewer (±5 lines around)
+                # Click-through location viewer
                 with st.expander(f"📍 Location Context: `{evidence_location}`", expanded=False):
-                    context = extract_context_lines(
-                        source_path_str=source_path_str,
-                        location=evidence_location,
-                        window=5,
+                    span = resolve_source_span(
+                        evidence_location=evidence_location,
                         submission=submission,
-                        evidence_text=evidence_text,
                     )
-                    st.code(context, language=None)
+                    if span:
+                        st.code(span, language=None)
+                    else:
+                        st.caption("(location could not be resolved)")
 
                 # Action buttons (Approve / Override / Request re-run)
                 recorded_fb = feedback_by_verdict.get(v_id)
@@ -430,7 +429,10 @@ def render_passed_checks(passed: list[dict[str, Any]]) -> None:
 # ────────────────────────────────────────────────────────────────────────
 # SECTION 6 — UNSUPPORTED
 # ────────────────────────────────────────────────────────────────────────
-def render_unsupported(unsupported: list[dict[str, Any]]) -> None:
+def render_unsupported(
+    unsupported: list[dict[str, Any]],
+    submission: dict[str, Any] | None = None,
+) -> None:
     """Section 6: Unsupported evidence (collapsed expander)."""
     header_text = f"6. Unsupported Evidence ({len(unsupported)}) — not surfaced as findings"
     with st.expander(header_text, expanded=False):
@@ -449,6 +451,16 @@ def render_unsupported(unsupported: list[dict[str, Any]]) -> None:
                 st.markdown(f"**`{cap}` / `{check_id}`** — Reason: *{reason}*")
                 st.caption(f"Location claimed: `{ev_loc}`")
                 st.code(ev_text if ev_text else "(empty text)")
+
+                with st.expander(f"📍 Location Context: `{ev_loc}`", expanded=False):
+                    span = resolve_source_span(
+                        evidence_location=ev_loc,
+                        submission=submission,
+                    )
+                    if span:
+                        st.code(span, language=None)
+                    else:
+                        st.caption("(location could not be resolved)")
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -612,7 +624,7 @@ def render_submission_page(external_id: str | None = None) -> None:
                 unsupported_verdicts.append(item)
                 seen_unsupp.add(c_id)
 
-    render_unsupported(unsupported_verdicts)
+    render_unsupported(unsupported_verdicts, submission=submission)
 
     # 7. Audit Footer
     skill_versions = {}

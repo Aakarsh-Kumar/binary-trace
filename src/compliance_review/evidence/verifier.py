@@ -68,11 +68,7 @@ def resolve_source_span(
 
     # Handle legacy 3-positional-arg call: resolve_source_span(kind, groups, submission_data)
     if kind is None and groups is None:
-        if (
-            location is not None
-            and submission is not None
-            and isinstance(submission, tuple | list)
-        ):
+        if location is not None and submission is not None and isinstance(submission, tuple | list):
             kind = str(location)
             groups = submission
             data = submission_data or {}
@@ -113,7 +109,11 @@ def resolve_source_span(
     if kind == "page":
         page_num = int(groups[0])
         pages = data.get("pages", {})
-        return str(pages.get(page_num, data.get("text", "")))
+        if pages:
+            return str(pages.get(page_num, ""))
+        if page_num == 1:
+            return str(data.get("text", ""))
+        return ""
 
     elif kind == "file":
         rel_path, line_no_str = groups[0], groups[1]
