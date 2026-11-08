@@ -32,7 +32,8 @@ def ingest_pdf(file_path: Path | str) -> tuple[str, str, dict[int, str]]:
         raw_text = page.get_text()
 
         # Common page metadata patterns to strip (D-042)
-        # Strips running headers, footers, bare page numbers, preprints, and isolated email lines
+        # Strips running headers, footers, bare page numbers, preprints, Turnitin metadata,
+        # and isolated email lines
         cleaned_text = raw_text
         patterns = [
             r"^Page \d+ of \d+.*$",
@@ -41,6 +42,7 @@ def ingest_pdf(file_path: Path | str) -> tuple[str, str, dict[int, str]]:
             r"^\d+\s*$",
             r"^Preprint\.? Submitted to.*$",
             r"^\s*\S+@\S+\.\S+\s*$",
+            r"^trn:.*$",
         ]
         for pat in patterns:
             cleaned_text = re.sub(pat, "", cleaned_text, flags=re.MULTILINE)
