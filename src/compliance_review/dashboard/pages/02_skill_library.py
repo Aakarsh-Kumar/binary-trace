@@ -42,9 +42,9 @@ def render_skill_library() -> None:
     n_skills = len(all_skills)
     capabilities_in_skills = sorted({s.capability for s in all_skills})
     n_capabilities = len(capabilities_in_skills)
-    n_active = sum(1 for s in all_skills if s.eval_status == "active")
-    n_evaluating = sum(1 for s in all_skills if s.eval_status == "evaluating")
-    n_draft = sum(1 for s in all_skills if s.eval_status == "draft")
+    n_active = len([s for s in all_skills if s.eval_status == "active"])
+    n_evaluating = len([s for s in all_skills if s.eval_status == "evaluating"])
+    n_draft = len([s for s in all_skills if s.eval_status == "draft"])
 
     st.header("Skill Library")
     st.caption(
