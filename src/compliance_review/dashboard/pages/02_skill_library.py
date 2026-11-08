@@ -66,7 +66,8 @@ def render_skill_library() -> None:
                 continue
 
             for skill in cap_skills:
-                expander_label = f"{skill.version} — {skill.eval_status} — {len(skill.checklist)} checks"
+                n_checks = len(skill.checklist)
+                expander_label = f"{skill.version} — {skill.eval_status} — {n_checks} checks"
                 with st.expander(expander_label):
                     st.markdown("#### Frontmatter")
                     frontmatter_data = [

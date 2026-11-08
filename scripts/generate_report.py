@@ -1,22 +1,25 @@
+# ruff: noqa
 """Generate data/labels/eval_v2_report.md from eval_v2.json and DB."""
 
 import csv
 import json
 from collections import defaultdict
 from pathlib import Path
+
 from sqlalchemy import select
 
 from compliance_review.db.engine import get_engine
 from compliance_review.db.tables import checklist_verdicts, skill_executions
 
+
 def generate_report():
     json_path = Path("data/labels/eval_v2.json")
-    with open(json_path, "r", encoding="utf-8") as f:
+    with open(json_path, encoding="utf-8") as f:
         eval_data = json.load(f)
 
     # 1. Load gold labels
     gold_map = {}
-    with open("data/labels/gold_labels.csv", "r", encoding="utf-8-sig") as f:
+    with open("data/labels/gold_labels.csv", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         for row in reader:
             gold_map[(int(row["submission_id"]), row["check_id"])] = row

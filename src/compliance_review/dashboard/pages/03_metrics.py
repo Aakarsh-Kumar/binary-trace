@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -48,17 +48,23 @@ def render_metrics_page() -> None:
         )
         return
 
-    with open(eval_path, "r", encoding="utf-8") as f:
+    with open(eval_path, encoding="utf-8") as f:
         eval_data: dict[str, Any] = json.load(f)
 
     retrieval_data: dict[str, Any] = {}
     if retrieval_path.exists():
-        with open(retrieval_path, "r", encoding="utf-8") as f:
+        with open(retrieval_path, encoding="utf-8") as f:
             retrieval_data = json.load(f)
 
     # 1. Header & Capability Filter
     st.header("Metrics")
-    capabilities = ["all", "code-quality", "citation-integrity", "report-structure", "rai-disclosure"]
+    capabilities = [
+        "all",
+        "code-quality",
+        "citation-integrity",
+        "report-structure",
+        "rai-disclosure",
+    ]
     selected = st.selectbox("Capability", capabilities)
 
     summary = eval_data.get("summary", {})
@@ -170,7 +176,7 @@ def render_metrics_page() -> None:
                     "pre_R": str(pre_r),
                     "post_R": str(post_r),
                     "post_FFR": str(post_ffr),
-                    "agreement": f"{agree:.4f}" if isinstance(agree, (int, float)) else str(agree),
+                    "agreement": f"{agree:.4f}" if isinstance(agree, int | float) else str(agree),
                 }
             )
     st.table(check_rows)

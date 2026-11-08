@@ -44,7 +44,9 @@ CRITICAL RULES:
 5. When verdict is 'pass' or 'not_applicable' and no span is cited:
    - set "evidence_text": null
    - set "evidence_location": null
-6. Assign a confidence in [0.5, 0.99] that reflects how clearly the evidence supports the verdict. Only use values above 0.95 when the evidence is a literal match.
+6. Assign a confidence in [0.5, 0.99] that reflects how clearly the evidence
+   supports the verdict. Only use values above 0.95 when the evidence is
+   a literal match.
 """
 
 CAPABILITY_REVIEW_PROMPT_TEMPLATE = """{system_instruction}
