@@ -96,10 +96,10 @@ def render_skill_library() -> None:
                         )
                     st.table(checklist_rows)
 
-                    with st.expander("Full evidence requirements"):
-                        for item in skill.checklist:
-                            st.markdown(f"**`{item.id}`**")
-                            st.code(item.evidence_requirement, language="text")
+                    st.markdown("**Full evidence requirements**")
+                    for item in skill.checklist:
+                        st.caption(f"**`{item.id}`**")
+                        st.code(item.evidence_requirement, language="text")
 
                     if skill.deterministic_preconditions:
                         st.markdown("#### Preconditions")
