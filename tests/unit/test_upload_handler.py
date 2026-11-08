@@ -120,3 +120,4 @@ def test_upload_model_error() -> None:
     finally:
         if created_file and created_file.exists():
             created_file.unlink()
+

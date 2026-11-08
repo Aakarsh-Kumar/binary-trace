@@ -21,6 +21,7 @@ data/raw/*
 !data/raw/MANIFEST.json
 !data/pilots/
 data/pilots/PILOT_REPORT.md
+data/pilots/*.png
 !data/labels/
 data/labels/CORPUS_STATE.json
 
