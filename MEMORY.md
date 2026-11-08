@@ -21,11 +21,11 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4.5-hotfix closed — ready for P4.6 sidebar uploader |
+| Current phase | P4 complete (P4.6 closed) — ready for P4-pilot |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 0de71ae |
-| Unit test count | 64 |
+| Last green commit | 28d9c1c |
+| Unit test count | 68 |
 | Integration test count | 18 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
