@@ -24,7 +24,7 @@ This file is the project's persistent memory. It is the first file an agent read
 | Current phase | P4.7-fix (revert v2 checklist to eval_v2 baseline, unify location context) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | ac5f43a |
+| Last green commit | d68b2e5 |
 | Unit test count | 70 |
 | Integration test count | 19 |
 | Skills at `eval_status: active` | 0 |
@@ -697,7 +697,7 @@ This file is the project's persistent memory. It is the first file an agent read
 - Resolution: unified both call sites to the actual positional signature `resolve_source_span(location, submission)`. Added signature-identity test `test_finding_and_unsupported_use_same_resolver_signature`.
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-fix-2`
-- Commits: pending
+- Commits: d68b2e5
 
 ---
 
