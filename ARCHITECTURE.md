@@ -575,8 +575,8 @@ Exit codes: `0` success · `1` validation/ingestion · `2` runtime · `3` invari
 | Page | File | Reads | Status |
 |---|---|---|---|
 | Submission review | `pages/01_submission.py` | `submissions`, `retrieval_events`, `skill_executions`, `checklist_verdicts`, `evidence_verifications` | Active |
-| Skill library | `pages/02_skill_library.py` | `skills/` on disk + `skill_executions` | Deferred to camera-ready (D-033) |
-| Metrics | `pages/03_metrics.py` | `metrics/compute.py` output cached to `data/cache/` | Deferred to camera-ready (D-033) |
+| Skill library | `pages/02_skill_library.py` | `skills/` on disk + `skill_executions` | Active (D-038) |
+| Metrics | `pages/03_metrics.py` | `data/labels/eval_v2.json` + `retrieval_eval_v2.json` | Active (D-038) |
 
 ### 10.2 Submission page layout (frozen order)
 

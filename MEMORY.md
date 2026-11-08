@@ -561,9 +561,30 @@ This file is the project's persistent memory. It is the first file an agent read
 ### D-033: Defer dashboard pages 02_skill_library and 03_metrics to camera-ready
 - Date: 2026-11-08 · Decided by: human:arch
 - Decision: Dashboard pages 02_skill_library and 03_metrics are deferred to camera-ready. Implement them as stubs with a st.info() message.
-- Context: Focuses P4-code entirely on the Submission review page (seven frozen sections).
+- Context: Focuses P4-code entirely on the Submission review page (seven frozen sections). Rescinded by D-038.
 - Documents amended: ARCHITECTURE.md §10.1
 - Reversible: yes
+
+### D-035: Wrap override controls in st.popover
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Replace inline reason selectbox in 01_submission.py findings with st.popover("Override") containing selectbox (index=None, placeholder), comment input, and confirm button.
+- Context: Prevents default selectbox reason code ("evidence_insufficient") from appearing inline as an ambiguous badge on un-overridden findings.
+- Documents amended: src/compliance_review/dashboard/pages/01_submission.py
+- Reversible: yes
+
+### D-036: Calibrate confidence prompt instructions
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Update prompts.py JSON example confidence to 0.87 and instruct model to assign confidence in [0.5, 0.99] reflecting evidence support clarity (> 0.95 reserved for literal matches).
+- Context: Eliminates collapse to 1.0 caused by 1.0 worked-example priming and explicit pass/not_applicable default instruction.
+- Documents amended: src/compliance_review/model/prompts.py
+- Reversible: yes
+
+### D-038: Skill Library and Metrics pages implemented (D-033 rescinded)
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Implement 02_skill_library.py (4 capability tabs, version expanders, execution stats) and 03_metrics.py (5 frozen sections); D-033 is rescinded.
+- Context: Closes P4.5 dashboard story across all 3 pages per ARCHITECTURE.md §10.1-10.3.
+- Documents amended: ARCHITECTURE.md §10.1
+- Reversible: no
 
 ---
 
@@ -589,6 +610,17 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4-hotfix`
 - Commits: 9eedabd, 8819c32, 31a8da1, 4456c12
+
+### TF-003: disagreement view on pilot submission test-pilot-pilot_mixed_two_issues-56c253
+- Date: 2026-11-08
+- Test: manual streamlit render of 01_submission.py
+- Error: Informational (not a bug): Disagreement view displayed "No disagreement across runs".
+- Suspected cause: Suspected missing data or UI bug, but investigation confirmed agreement is 1.0000 across all k=3 runs for this pilot submission.
+- Alternatives considered: Display mock variance — rejected (falsifies review data).
+- Resolution: No fix needed. Display logic is mathematically correct. Real multi-run variance correctly renders for the 8 submissions in the DB with distinct_verdicts > 1 (e.g. eval_mixed_19, eval_prose_12).
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.5`
+- Commits: none (informational diagnosis)
 
 ---
 
