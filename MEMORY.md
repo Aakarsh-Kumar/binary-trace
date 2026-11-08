@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.9 |
+| Document version | 1.3.0 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -688,6 +688,16 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-fix`
 - Commits: 1d3906e, ac5f43a
+
+### TF-007: resolve_source_span signature mismatch in finding render path
+- Date: 2026-11-08
+- Test: manual streamlit render of Location Context on HALO upload
+- Error: TypeError: resolve_source_span() got an unexpected keyword argument 'evidence_location'
+- Cause: finding render path called resolver with keyword args that did not match the function's actual positional signature.
+- Resolution: unified both call sites to the actual positional signature `resolve_source_span(location, submission)`. Added signature-identity test `test_finding_and_unsupported_use_same_resolver_signature`.
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.7-fix-2`
+- Commits: pending
 
 ---
 

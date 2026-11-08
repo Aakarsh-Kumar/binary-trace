@@ -90,7 +90,7 @@ def extract_context_lines(
                 ),
             }
 
-        resolved_span = resolve_source_span(evidence_location=location, submission=sub)
+        resolved_span = resolve_source_span(location, sub)
         if not resolved_span:
             return f"(no context found for location {location})"
 
@@ -282,10 +282,7 @@ def render_findings(
 
                 # Click-through location viewer
                 with st.expander(f"📍 Location Context: `{evidence_location}`", expanded=False):
-                    span = resolve_source_span(
-                        evidence_location=evidence_location,
-                        submission=submission,
-                    )
+                    span = resolve_source_span(evidence_location, submission)
                     if span:
                         st.code(span, language=None)
                     else:
@@ -453,10 +450,7 @@ def render_unsupported(
                 st.code(ev_text if ev_text else "(empty text)")
 
                 with st.expander(f"📍 Location Context: `{ev_loc}`", expanded=False):
-                    span = resolve_source_span(
-                        evidence_location=ev_loc,
-                        submission=submission,
-                    )
+                    span = resolve_source_span(ev_loc, submission)
                     if span:
                         st.code(span, language=None)
                     else:
