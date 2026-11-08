@@ -10,7 +10,7 @@ checklist:
 - id: cite-doi-resolvable
   question: Are all cited DOIs resolvable via Crossref API?
   severity: high
-  evidence_requirement: section:references (verbatim DOI string)
+  evidence_requirement: Verbatim line containing the unresolvable DOI copied from section:references
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -18,7 +18,7 @@ checklist:
 - id: cite-not-retracted
   question: Are cited works free from known retractions in Crossref/OpenAlex?
   severity: critical
-  evidence_requirement: section:references (verbatim reference entry)
+  evidence_requirement: Verbatim retraction notice line or retracted bibliography entry copied from section:references
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -26,7 +26,7 @@ checklist:
 - id: cite-no-duplicates
   question: Is the bibliography free of duplicate references?
   severity: low
-  evidence_requirement: section:references (verbatim duplicate entry)
+  evidence_requirement: "A complete bibliography entry copied verbatim, beginning with its reference marker ([N] or N.). Both copies of the duplicated entry must appear in the submission. Page headers, footers, and page numbers are not valid evidence."
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
