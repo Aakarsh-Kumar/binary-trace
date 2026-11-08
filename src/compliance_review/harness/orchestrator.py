@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from compliance_review.db.repository import (
+    get_skill_executions_for_submission,
     get_submission_by_id,
     record_retrieval_event,
     record_skill_execution_run,
@@ -129,8 +130,17 @@ def run_review(
         raw_runs: list[list[dict[str, Any]]] = []
         runs_meta: list[dict[str, Any]] = []
 
+        existing_execs = get_skill_executions_for_submission(submission_id)
+        matching_runs = [
+            e["run_index"]
+            for e in existing_execs
+            if e["skill_capability"] == cap and e["skill_version"] == version
+        ]
+        base_run_idx = max(matching_runs, default=0)
+
         # Execute k runs
-        for run_idx in range(1, k + 1):
+        for run_offset in range(1, k + 1):
+            run_idx = base_run_idx + run_offset
             verdicts, model_name, digest, prompt_sha256, parsed, status, lat_ms = (
                 run_single_capability_execution(
                     capability=cap,
@@ -178,8 +188,8 @@ def run_review(
         all_final_verdicts[cap] = capped_runs[0] if capped_runs else []
 
         # 7. Persist skill executions, verdicts, and evidence verifications
-        for run_idx in range(1, k + 1):
-            meta = runs_meta[run_idx - 1]
+        for idx, meta in enumerate(runs_meta):
+            run_idx = meta["run_index"]
             record_skill_execution_run(
                 submission_id=submission_id,
                 capability=cap,
@@ -192,7 +202,7 @@ def run_review(
                 parsed_output=meta["parsed_output"],
                 status=meta["status"],
                 latency_ms=meta["latency_ms"],
-                verdicts_data=capped_runs[run_idx - 1],
+                verdicts_data=capped_runs[idx],
             )
 
     total_latency_ms = int((time.perf_counter() - start_time) * 1000)

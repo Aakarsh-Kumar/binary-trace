@@ -498,6 +498,21 @@ def render_submission_page(external_id: str | None = None) -> None:
     all_verdicts = cached_get_verdicts_for_submission(sub_id)
     existing_feedback = cached_get_reviewer_feedback_for_submission(sub_id)
 
+    # Group executions by capability and identify the latest review session's executions
+    caps_in_exec = sorted(list({e["skill_capability"] for e in executions}))
+    latest_exec_ids: set[int] = set()
+    for cap in caps_in_exec:
+        cap_execs = [e for e in executions if e["skill_capability"] == cap]
+        cap_execs.sort(key=lambda x: x["run_index"])
+        for ex in cap_execs[-3:]:
+            latest_exec_ids.add(ex["id"])
+
+    display_verdicts = (
+        [v for v in all_verdicts if v.get("execution_id") in latest_exec_ids]
+        if latest_exec_ids
+        else all_verdicts
+    )
+
     # 1. Header
     render_header(submission)
 
@@ -508,7 +523,7 @@ def render_submission_page(external_id: str | None = None) -> None:
     verified_findings: list[dict[str, Any]] = []
     seen_checks: set[str] = set()
 
-    for v in all_verdicts:
+    for v in display_verdicts:
         if v.get("verdict") == "flag":
             v_id = v["id"]
             c_id = v.get("check_id", "")
@@ -525,8 +540,6 @@ def render_submission_page(external_id: str | None = None) -> None:
     runs_by_cap: dict[str, list[list[dict[str, Any]]]] = {}
     disagreements: list[dict[str, Any]] = []
 
-    # Group executions by capability and load runs
-    caps_in_exec = sorted(list({e["skill_capability"] for e in executions}))
     settings = Settings()  # type: ignore[call-arg]
     stability_thresh = settings.cr_stability_threshold
 
@@ -534,7 +547,7 @@ def render_submission_page(external_id: str | None = None) -> None:
         cap_execs = [e for e in executions if e["skill_capability"] == cap]
         cap_execs.sort(key=lambda x: x["run_index"])
         runs: list[list[dict[str, Any]]] = []
-        for ex in cap_execs:
+        for ex in cap_execs[-3:]:
             v_list = cached_get_verdicts_for_execution(ex["id"])
             runs.append(v_list)
         runs_by_cap[cap] = runs
@@ -557,7 +570,7 @@ def render_submission_page(external_id: str | None = None) -> None:
     # 5. Passed Checks
     passed_verdicts: list[dict[str, Any]] = []
     seen_passed: set[str] = set()
-    for v in all_verdicts:
+    for v in display_verdicts:
         if v.get("verdict") in ("pass", "not_applicable"):
             c_id = v.get("check_id", "")
             if c_id not in seen_passed:
@@ -569,7 +582,7 @@ def render_submission_page(external_id: str | None = None) -> None:
     # 6. Unsupported
     unsupported_verdicts: list[dict[str, Any]] = []
     seen_unsupp: set[str] = set()
-    for v in all_verdicts:
+    for v in display_verdicts:
         if v.get("verdict") == "unsupported_evidence":
             c_id = v.get("check_id", "")
             if c_id not in seen_unsupp:

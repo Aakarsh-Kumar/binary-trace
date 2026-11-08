@@ -139,9 +139,7 @@ def build_evaluation_prompt(
         else "NOTE: This is a code repository. Use location 'file:<relative_path>:<line_number>'."
     )
     citation_guidance = (
-        f"\n\n{CITATION_CHECK_GUIDANCE}"
-        if capability == "citation-integrity"
-        else ""
+        f"\n\n{CITATION_CHECK_GUIDANCE}" if capability == "citation-integrity" else ""
     )
     return CAPABILITY_REVIEW_PROMPT_TEMPLATE.format(
         system_instruction=SYSTEM_INSTRUCTION,
