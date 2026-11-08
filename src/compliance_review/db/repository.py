@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from sqlalchemy import Connection, select
+from sqlalchemy import Connection, case, func, select
 
 from compliance_review.db.engine import get_engine
 from compliance_review.db.tables import (
@@ -593,3 +593,43 @@ def list_submissions(
     with engine.connect() as active_conn:
         rows = active_conn.execute(stmt).mappings().all()
         return [dict(r) for r in rows]
+
+
+def get_skill_execution_stats_for_capability(
+    capability: str,
+    version: str,
+    conn: Connection | None = None,
+) -> dict[str, Any]:
+    """Retrieve aggregate execution statistics for a capability version (US-11)."""
+    stmt = (
+        select(
+            func.count().label("run_count"),
+            func.avg(skill_executions.c.latency_ms).label("avg_latency_ms"),
+            func.sum(
+                case((skill_executions.c.status == "schema_error", 1), else_=0)
+            ).label("schema_error_count"),
+        )
+        .where(
+            skill_executions.c.skill_capability == capability,
+            skill_executions.c.skill_version == version,
+        )
+        .group_by(skill_executions.c.skill_capability, skill_executions.c.skill_version)
+    )
+    if conn is not None:
+        row = conn.execute(stmt).mappings().first()
+    else:
+        engine = get_engine()
+        with engine.connect() as active_conn:
+            row = active_conn.execute(stmt).mappings().first()
+
+    if not row:
+        return {
+            "run_count": 0,
+            "avg_latency_ms": 0.0,
+            "schema_error_count": 0,
+        }
+    return {
+        "run_count": int(row["run_count"] or 0),
+        "avg_latency_ms": float(row["avg_latency_ms"] or 0.0),
+        "schema_error_count": int(row["schema_error_count"] or 0),
+    }
