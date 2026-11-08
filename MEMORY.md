@@ -670,7 +670,7 @@ This file is the project's persistent memory. It is the first file an agent read
 - Resolution: exposed shared source resolver in evidence/verifier.py; both components now use the same extraction path
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-hotfix`
-- Commits: pending
+- Commits: 49c4040
 
 ---
 
