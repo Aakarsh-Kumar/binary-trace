@@ -181,6 +181,7 @@ compliance-review/
 │   ├── code-quality/
 │   └── rai-disclosure/
 ├── data/                                 # GITIGNORED (except data/pilots/)
+│   ├── incoming/                         # temporary upload storage for dashboard submissions (D-041)
 │   ├── pilots/                           # 10 hand-authored pilot submissions (<= 50 KB each, committed) (D-013)
 │   ├── submissions/
 │   ├── labels/
@@ -619,6 +620,15 @@ Forbidden in dashboard code:
 - Direct SQL (all reads through `db/repository.py`)
 - Any recomputation of agreement, FFR, or precision
 - Any write to DB except through `db/repository.py::record_reviewer_feedback`
+
+### 10.5 Sidebar Upload Flow (D-041)
+
+The sidebar provides a file uploader allowing interactive demonstration of end-to-end ingestion and review (app chrome, not a fourth page):
+1. **File Selection**: Accepts `pdf`, `docx`, `md`, `txt` files up to 50 MB.
+2. **Submission Type**: User selects `prose`, `code`, or `mixed` via radio button.
+3. **Execution**: "Ingest & review" button triggers pure `handle_upload` handler with `st.sidebar.spinner`.
+4. **Persistence & Review**: Writes uploaded file to `data/incoming/{ts}_{safe_name}`, generates external ID `upload-{ts}-{basename}`, calls ingestion pipeline, runs evaluation pipeline under `skill_status="evaluating"`.
+5. **Navigation**: On success, sets `session_state["selected_submission_external_id"]` to the new ID and reruns to immediately display all seven sections in the Submission review page.
 
 ## 11. Structlog JSON Schema
 

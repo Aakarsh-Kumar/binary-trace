@@ -586,6 +586,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: ARCHITECTURE.md §10.1
 - Reversible: no
 
+### D-041: Sidebar upload-and-review widget
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Add sidebar upload-and-review widget to dashboard/app.py as app chrome (preserving the three-page rule of §10.1). Writes uploads to data/incoming/, runs ingest and review with evaluating skills, and sets the newly created submission active in session_state.
+- Context: Provides user-facing upload-to-review demo for DO5.
+- Documents amended: ARCHITECTURE.md §3, §10.5
+- Reversible: yes
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
