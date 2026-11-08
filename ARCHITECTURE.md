@@ -76,6 +76,8 @@ These are not optional. They are enforced by the file layout and by INSTRUCTIONS
 | Fuzzy match for evidence | stdlib `difflib.SequenceMatcher` | rapidfuzz, fuzzywuzzy, thefuzz |
 | Code static analysis | `ruff` invoked as a subprocess, and `pylint` invoked as a subprocess **on student code only** | importing astroid directly, bandit, semgrep |
 
+**Page metadata stripping rule (D-042):** Ingestion MUST strip common page headers and footers (page numbers, arXiv preprints, bare emails) from PDF text before downstream processing to prevent metadata hallucination.
+
 ### 2.6 CLI, logging, dashboard
 
 | Component | Allowed | Banned |
@@ -130,7 +132,7 @@ compliance-review/
 │       ├── model/
 │       │   ├── __init__.py
 │       │   ├── qwen_client.py            # ollama client wrapper
-│       │   ├── prompts.py                # ALL prompt templates; no inline prompts elsewhere
+│       │   ├── prompts.py                # ALL prompt templates; no inline prompts elsewhere; citation evidence rules (D-042)
 │       │   └── schema_validation.py      # parse + validate ModelOutput
 │       ├── checks/
 │       │   ├── __init__.py

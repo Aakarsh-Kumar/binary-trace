@@ -593,6 +593,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: ARCHITECTURE.md §3, §10.5
 - Reversible: yes
 
+### D-042: Citation evidence-quality fix
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Strip common page headers and footers during PDF text extraction in `ingestion/pdf.py`. Tighten citation prompts in `model/prompts.py` to mandate quoting verbatim bibliography entries for `cite-no-duplicates`, DOI-bearing lines for `cite-doi-resolvable`, and retraction notices for `cite-not-retracted`. Update `skills/citation-integrity/v2/SKILL.md` evidence requirements accordingly.
+- Context: Prevents PDF page metadata ("Page 8 of 9 - AI Writing Submission") from being cited as evidence for citation duplicates.
+- Documents amended: ARCHITECTURE.md §2.5, §3, skills/citation-integrity/v2/SKILL.md
+- Reversible: yes
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
