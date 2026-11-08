@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.2.8 |
+| Document version | 1.2.9 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,12 +21,12 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4 complete (P4.6 closed) — ready for P4-pilot |
+| Current phase | P4.7-fix (revert v2 checklist to eval_v2 baseline, unify location context) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | 28d9c1c |
-| Unit test count | 68 |
-| Integration test count | 18 |
+| Last green commit | 6083c46 |
+| Unit test count | 70 |
+| Integration test count | 19 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -615,6 +615,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: ARCHITECTURE.md §3, MEMORY.md §6
 - Reversible: yes
 
+### D-044: Skill v2 checklist scope violation and revert
+- Date: 2026-11-08 · Decided by: human:arch
+- Decision: Skill v2 checklist scope violation and revert. Between commits c5d8e85..HEAD, the v2 checklist for citation-integrity and report-structure was modified out of scope (removed cite-context-accurate, struct-claim-evidence-alignment; added cite-using-numeric-notation, struct-using-figures). This violated version-identity: eval_v2.json was computed against the pre-change checklist. Reverted to the e8be242 checklist state while retaining D-042's evidence_requirement change for cite-no-duplicates.
+- Context: Preserves version-identity with eval_v2.json so production and evaluation runs evaluate the identical 10 check IDs (cite-claim-supported, cite-context-accurate, cite-doi-resolvable, cite-no-duplicates, cite-not-retracted, struct-claim-evidence-alignment, struct-heading-order, struct-minimum-length, struct-required-sections, struct-semantic-coherence).
+- Documents amended: skills/citation-integrity/v2/SKILL.md, skills/report-structure/v2/SKILL.md
+- Reversible: no
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
@@ -671,6 +678,16 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-hotfix`
 - Commits: 49c4040
+
+### TF-006: check IDs discrepancy between HALO reviews and empty Location Context in Section 3
+- Date: 2026-11-08
+- Test: manual streamlit render of 01_submission.py on uploaded HALO PDF
+- Trigger: Discrepancy in check IDs between two HALO uploads in the dashboard (Run 1 had cite-context-accurate and struct-claim-evidence-alignment; Run 2 had cite-using-numeric-notation and struct-using-figures).
+- Impact: Paper-blocking if undetected: eval_v2.json claims metrics for one checklist while production runs evaluate a different one.
+- Fix: Reverted both v2 SKILL.md checklists to e8be242 baseline, keeping only D-042's cite-no-duplicates evidence_requirement. Unified render_findings and render_unsupported to call resolve_source_span directly.
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.7-fix`
+- Commits: pending
 
 ---
 

@@ -10,7 +10,7 @@ checklist:
 - id: cite-doi-resolvable
   question: Are all cited DOIs resolvable via Crossref API?
   severity: high
-  evidence_requirement: Verbatim line containing the unresolvable DOI copied from section:references
+  evidence_requirement: section:references (verbatim DOI string)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
@@ -18,7 +18,7 @@ checklist:
 - id: cite-not-retracted
   question: Are cited works free from known retractions in Crossref/OpenAlex?
   severity: critical
-  evidence_requirement: Verbatim retraction notice line or retracted bibliography entry copied from section:references
+  evidence_requirement: section:references (verbatim reference entry)
   deterministic_only: true
   advisory: false
   false_positive_guardrails:
