@@ -283,7 +283,7 @@ def render_findings(
                     code_suffix = f" ({r_code})" if r_code else ""
                     st.success(f"Action recorded: **{act_txt}** by `{rev_txt}`{code_suffix}")
                 else:
-                    btn_c1, btn_c2, btn_c3 = st.columns([1, 2, 1])
+                    btn_c1, btn_c2, btn_c3 = st.columns([1, 1, 1])
 
                     with btn_c1:
                         if st.button("Approve", key=f"app_{v_id}"):
@@ -296,21 +296,28 @@ def render_findings(
                             st.rerun()
 
                     with btn_c2:
-                        override_reason = st.selectbox(
-                            "Override Reason",
-                            options=REASON_CODES,
-                            key=f"reason_{v_id}",
-                            label_visibility="collapsed",
-                        )
-                        if st.button("Override", key=f"over_{v_id}"):
-                            record_reviewer_feedback(
-                                submission_id=sub_id,
-                                verdict_id=v_id,
-                                reviewer_id="reviewer:dashboard",
-                                action="override",
-                                reason_code=override_reason,
+                        with st.popover("Override"):
+                            override_reason = st.selectbox(
+                                "Reason",
+                                options=REASON_CODES,
+                                index=None,
+                                placeholder="Select reason…",
+                                key=f"reason_{v_id}",
                             )
-                            st.rerun()
+                            override_comment = st.text_input(
+                                "Comment (optional)",
+                                key=f"comment_{v_id}",
+                            )
+                            if st.button("Confirm override", key=f"over_{v_id}"):
+                                record_reviewer_feedback(
+                                    submission_id=sub_id,
+                                    verdict_id=v_id,
+                                    reviewer_id="reviewer:dashboard",
+                                    action="override",
+                                    reason_code=override_reason,
+                                    comment=override_comment if override_comment else None,
+                                )
+                                st.rerun()
 
                     with btn_c3:
                         if st.button("Request Re-run", key=f"rerun_{v_id}"):
