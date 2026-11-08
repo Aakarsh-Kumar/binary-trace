@@ -309,6 +309,14 @@ This file is the project's persistent memory. It is the first file an agent read
 - Depends on: `src/compliance_review/dashboard/pages/01_submission.py`, `src/compliance_review/db/repository.py`.
 - Supersedes: none
 
+### [2026-11-08] src/compliance_review/ingestion/pdf.py, model/prompts.py, skills/citation-integrity/v2/SKILL.md — US-01, US-20, US-06, D-042
+- Verified by: `agent:p4.7`
+- Commit: 08df022
+- Tests: `tests/unit/test_pdf_footer_strip.py`, `compliance-review skills validate --root skills/`
+- Behaviour: Three-layer fix for citation evidence quality: strips common PDF metadata headers/footers (including Turnitin metadata) during text extraction in pdf.py, adds check-specific shape guidance in prompts.py requiring verbatim bibliography entries for cite-no-duplicates, and tightens evidence_requirement in citation-integrity/v2/SKILL.md.
+- Depends on: `src/compliance_review/ingestion/pdf.py`, `src/compliance_review/model/prompts.py`, `skills/citation-integrity/v2/SKILL.md`.
+- Supersedes: none
+
 ---
 
 ## 3. Active Roadblocks
