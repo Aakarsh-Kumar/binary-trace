@@ -369,18 +369,13 @@ This file is the project's persistent memory. It is the first file an agent read
 
 ## 5. State Adjustments
 
-```
-### SA-<NNN>: <parameter>
-- Changed: [YYYY-MM-DD]
-- From: <old value>
-- To: <new value>
-- Reason: <one sentence>
-- Frozen invariant affected: yes / no
-- If yes, PRD amendment: <commit sha>
-- Re-verified by: <test file>::<test name>
-```
-
-(No entries yet.)
+### SA-002: Stale HALO derived rows purge
+- Changed: 2026-11-10
+- From: 84 stale skill_executions, 378 stale checklist_verdicts, 84 evidence_verifications, 1 reviewer_feedback across upload-*Halo_Enhanced* submissions
+- To: 0 derived rows for upload-*Halo_Enhanced* submissions
+- Reason: One-off remediation: deleted all derived rows for upload-*Halo_Enhanced* submissions to clear stale data from before D-044 revert (1d3906e). Submissions rows preserved. 60-submission eval corpus unaffected.
+- Frozen invariant affected: no
+- Re-verified by: manual SQL count = 0
 
 ---
 
