@@ -57,11 +57,8 @@ CAPABILITY_REVIEW_PROMPT_TEMPLATE = """{system_instruction}
 CAPABILITY TO EVALUATE: {capability}
 SKILL VERSION: {version}
 
-CANONICAL CHECKLIST ITEMS (MANDATORY):
-{canonical_enumeration}
-
 CHECKLIST ITEMS TO EVALUATE:
-{checklist_formatted}{citation_guidance}
+{canonical_enumeration}{citation_guidance}
 
 SUBMISSION CONTEXT ({submission_type}):
 {type_hint}
@@ -196,7 +193,6 @@ def build_evaluation_prompt(
     """Build the full evaluation prompt for Qwen."""
     canonical_items = get_canonical_checklist_for_capability(capability, version, checklist)
     canonical_enum_str = format_canonical_enumeration(canonical_items)
-    checklist_str = format_checklist_items(checklist)
     # Truncate submission text if extremely large to respect context
     truncated_text = submission_text[:12000] if len(submission_text) > 12000 else submission_text
     type_hint = (
@@ -207,13 +203,15 @@ def build_evaluation_prompt(
     citation_guidance = (
         f"\n\n{CITATION_CHECK_GUIDANCE}" if capability == "citation-integrity" else ""
     )
+    schema_desc = JSON_SCHEMA_DESCRIPTION.replace(
+        '"<capability_name>"', f'"{capability}"'
+    )
     return CAPABILITY_REVIEW_PROMPT_TEMPLATE.format(
         system_instruction=SYSTEM_INSTRUCTION,
-        schema_description=JSON_SCHEMA_DESCRIPTION,
+        schema_description=schema_desc,
         capability=capability,
         version=version,
         canonical_enumeration=canonical_enum_str,
-        checklist_formatted=checklist_str,
         citation_guidance=citation_guidance,
         submission_type=submission_type,
         type_hint=type_hint,
