@@ -449,12 +449,12 @@ def render_unsupported(
                 st.caption(f"Location claimed: `{ev_loc}`")
                 st.code(ev_text if ev_text else "(empty text)")
 
-                with st.expander(f"📍 Location Context: `{ev_loc}`", expanded=False):
-                    span = resolve_source_span(ev_loc, submission)
-                    if span:
-                        st.code(span, language=None)
-                    else:
-                        st.caption("(location could not be resolved)")
+                span = resolve_source_span(ev_loc, submission)
+                if span:
+                    st.markdown(f"**📍 Location Context:** `{ev_loc}`")
+                    st.code(span, language=None)
+                else:
+                    st.caption("(location could not be resolved)")
 
 
 # ────────────────────────────────────────────────────────────────────────
