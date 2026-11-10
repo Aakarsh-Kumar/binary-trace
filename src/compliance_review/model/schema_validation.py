@@ -14,10 +14,12 @@ from compliance_review.skills.schema import ModelOutput
 def parse_and_validate_model_output(
     raw_text: str,
     expected_capability: str | None = None,
+    canonical_check_ids: set[str] | None = None,
 ) -> ModelOutput:
     """Parse JSON string and validate against ModelOutput schema.
 
-    Raises ModelSchemaError if JSON is malformed, extra keys exist, or required fields fail.
+    Raises ModelSchemaError if JSON is malformed, extra keys exist, required fields fail,
+    or any verdict check_id is not in canonical_check_ids.
     """
     clean_text = raw_text.strip()
     # Strip markdown fenced code blocks if present
@@ -47,7 +49,27 @@ def parse_and_validate_model_output(
             f"Capability mismatch: expected '{expected_capability}', got '{output.capability}'"
         )
 
+    if canonical_check_ids:
+        for v in output.verdicts:
+            if v.check_id not in canonical_check_ids:
+                raise ModelSchemaError(
+                    f"Hallucinated check_id: {v.check_id!r} not in {sorted(canonical_check_ids)}"
+                )
+
     return output
+
+
+def validate_model_output(
+    raw: str,
+    canonical_check_ids: set[str],
+    expected_capability: str | None = None,
+) -> ModelOutput:
+    """Validate model output against schema and canonical check IDs."""
+    return parse_and_validate_model_output(
+        raw_text=raw,
+        expected_capability=expected_capability,
+        canonical_check_ids=canonical_check_ids,
+    )
 
 
 def execute_model_evaluation_with_retry(
@@ -55,6 +77,7 @@ def execute_model_evaluation_with_retry(
     capability: str,
     run_index: int = 1,
     client: Any = None,
+    canonical_check_ids: set[str] | None = None,
 ) -> tuple[str, ModelOutput | None, str, int, str]:
     """Execute model evaluation with EXACTLY one schema retry on failure.
 
@@ -70,7 +93,11 @@ def execute_model_evaluation_with_retry(
         return "error", None, "0" * 64, 0, str(exc)
 
     try:
-        model_output = parse_and_validate_model_output(raw_text, expected_capability=capability)
+        model_output = parse_and_validate_model_output(
+            raw_text,
+            expected_capability=capability,
+            canonical_check_ids=canonical_check_ids,
+        )
         return "ok", model_output, digest, total_latency, raw_text
     except ModelSchemaError as err1:
         error_msg = str(err1)
@@ -84,7 +111,11 @@ def execute_model_evaluation_with_retry(
         return "schema_error", None, digest, total_latency, str(exc)
 
     try:
-        model_output = parse_and_validate_model_output(raw_text_2, expected_capability=capability)
+        model_output = parse_and_validate_model_output(
+            raw_text_2,
+            expected_capability=capability,
+            canonical_check_ids=canonical_check_ids,
+        )
         return "ok", model_output, digest, total_latency, raw_text_2
     except ModelSchemaError:
         # Second failure: return status='schema_error' with no verdicts (US-21)

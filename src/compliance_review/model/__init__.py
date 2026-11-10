@@ -12,6 +12,7 @@ from compliance_review.model.qwen_client import (
 from compliance_review.model.schema_validation import (
     execute_model_evaluation_with_retry,
     parse_and_validate_model_output,
+    validate_model_output,
 )
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "call_qwen",
     "execute_model_evaluation_with_retry",
     "parse_and_validate_model_output",
+    "validate_model_output",
     "resolve_model_digest",
 ]

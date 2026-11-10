@@ -32,11 +32,13 @@ def evaluate_code_model_checks(
         submission_text=submission_text,
     )
 
+    canonical_check_ids = {str(item["id"]) for item in checklist_items}
     status, model_output, digest, latency, raw = execute_model_evaluation_with_retry(
         prompt=prompt,
         capability="code-quality",
         run_index=run_index,
         client=client,
+        canonical_check_ids=canonical_check_ids,
     )
 
     verdicts: list[dict[str, Any]] = []

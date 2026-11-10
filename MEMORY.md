@@ -617,6 +617,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: skills/citation-integrity/v2/SKILL.md, skills/report-structure/v2/SKILL.md
 - Reversible: no
 
+### D-045: Validate model check_id against skill checklist
+- Date: 2026-11-10 · Decided by: human:arch
+- Decision: Enforce checklist membership in `schema_validation.py`. After `ModelOutput` parses successfully, each verdict's `check_id` is validated against the skill's canonical check IDs. Any hallucinated or out-of-scope `check_id` raises `ModelSchemaError`, triggering the single schema retry (US-21).
+- Context: Prevents LLM hallucinations (e.g. `cite-using-numeric-notation`, `struct-using-figures`) from entering `checklist_verdicts`.
+- Documents amended: `src/compliance_review/model/schema_validation.py`, `src/compliance_review/checks/model_based/`
+- Reversible: no
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
