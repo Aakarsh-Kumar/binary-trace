@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.1 |
+| Document version | 1.4.0 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -21,12 +21,12 @@ This file is the project's persistent memory. It is the first file an agent read
 
 | Field | Value |
 |---|---|
-| Current phase | P4.7-fix (revert v2 checklist to eval_v2 baseline, unify location context) |
+| Current phase | P4.7-fix-4 (prompt canonical check_id enumeration) |
 | Last completed milestone | P3 Milestone M3 (Retrieval Evaluation v2 - All Targets Met) |
 | Active branch | `main` |
-| Last green commit | d68b2e5 |
-| Unit test count | 70 |
-| Integration test count | 19 |
+| Last green commit | 155740b |
+| Unit test count | 80 |
+| Integration test count | 18 |
 | Skills at `eval_status: active` | 0 |
 | Skills at `eval_status: evaluating` | 4 |
 | Skills at `eval_status: draft` | 4 |
@@ -624,6 +624,13 @@ This file is the project's persistent memory. It is the first file an agent read
 - Documents amended: `src/compliance_review/model/schema_validation.py`, `src/compliance_review/checks/model_based/`
 - Reversible: no
 
+### D-046: Enumerate canonical check_ids in capability review prompts
+- Date: 2026-11-10 · Decided by: human:arch / agent:p4.7-fix-4
+- Decision: Dynamically inject canonical checklist item enumeration directly into `CHECKLIST ITEMS TO EVALUATE:` within capability review prompts from `SkillFrontmatter` on disk. Format strictly specifies: "Your response MUST contain a verdict for EACH of these {count} check_ids, using these exact strings (do not invent new check_ids): - <check_id>: <question>. Do not return any other check_id. If you cannot assess a check, return it with verdict 'not_applicable' and confidence < 0.5." Deduplicate model verdict entries before combining with deterministic verdicts.
+- Context: Small language models (Qwen 4B) generate hallucinated check IDs or copy terms from the submission text when check IDs are not prominently enumerated or when conflicting checklist blocks (e.g. separate citation guidance) compete in the prompt.
+- Documents amended: `src/compliance_review/model/prompts.py`, `src/compliance_review/checks/model_based/`
+- Reversible: no
+
 ---
 
 ## 7. Test Failures and Resolutions (append-only)
@@ -710,6 +717,16 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-fix-3`
 - Commits: 367810f, 8e0a38a
+
+### TF-009: Qwen check-ID hallucination on HALO upload submission
+- Date: 2026-11-10
+- Test: manual streamlit / CLI review of HALO PDF upload (`submission_id=294`)
+- Error: Model emitted hallucinated check IDs (`cite-using-numeric-citations`, etc.) causing Phase 1.5 schema validation rejection (`ModelSchemaError: Unknown check_ids for citation-integrity: {'cite-using-numeric-citations'}`).
+- Cause: `prompts.py` did not enumerate canonical check IDs in the prompt template, and a separate `CITATION_CHECK_GUIDANCE` block confused Qwen 4B into generating ungrounded checklist identifiers.
+- Resolution: Updated `prompts.py` to load canonical checklist items from `SkillFrontmatter` on disk and format an explicit enumeration mandate in every prompt. Removed distracting secondary checklist blocks. Added verdict deduplication in model-based check handlers. Added unit tests `tests/unit/test_prompt_check_id_enumeration.py`.
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.7-fix-4`
+- Commits: d56de24, ed8ead6, 560aeb1
 
 ---
 
