@@ -37,10 +37,12 @@ def evaluate_citation_model_checks(
     )
 
     model_check_ids = {str(item["id"]) for item in model_items}
+    seen_check_ids: set[str] = set()
     verdicts: list[dict[str, Any]] = []
     if model_output is not None:
         for v in model_output.verdicts:
-            if v.check_id in model_check_ids:
+            if v.check_id in model_check_ids and v.check_id not in seen_check_ids:
+                seen_check_ids.add(v.check_id)
                 vd = v.model_dump()
                 vd["check_source"] = "model"
                 verdicts.append(vd)

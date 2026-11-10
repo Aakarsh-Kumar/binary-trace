@@ -65,7 +65,7 @@ SUBMISSION CONTEXT ({submission_type}):
 
 {submission_text}
 
-Evaluate all listed checklist items. Output the final JSON object:
+Evaluate all listed checklist items. Output ONLY the final JSON object:
 """
 
 CITATION_CHECK_GUIDANCE = """
@@ -200,9 +200,7 @@ def build_evaluation_prompt(
         if submission_type in ("prose", "pdf", "disclosure_section")
         else "NOTE: This is a code repository. Use location 'file:<relative_path>:<line_number>'."
     )
-    citation_guidance = (
-        f"\n\n{CITATION_CHECK_GUIDANCE}" if capability == "citation-integrity" else ""
-    )
+    citation_guidance = ""
     schema_desc = JSON_SCHEMA_DESCRIPTION.replace(
         '"<capability_name>"', f'"{capability}"'
     )
