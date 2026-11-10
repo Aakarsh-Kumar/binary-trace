@@ -36,11 +36,13 @@ def evaluate_structure_model_checks(
         canonical_check_ids=canonical_check_ids,
     )
 
+    model_check_ids = {str(item["id"]) for item in model_items}
     verdicts: list[dict[str, Any]] = []
     if model_output is not None:
         for v in model_output.verdicts:
-            vd = v.model_dump()
-            vd["check_source"] = "model"
-            verdicts.append(vd)
+            if v.check_id in model_check_ids:
+                vd = v.model_dump()
+                vd["check_source"] = "model"
+                verdicts.append(vd)
 
     return status, verdicts, digest, latency, raw

@@ -1,5 +1,6 @@
 """Prompt templates for model-based checks conforming to ARCHITECTURE.md §5.3 and US-19."""
 
+from pathlib import Path
 from typing import Any
 
 SYSTEM_INSTRUCTION = """You are an objective academic and technical compliance review auditor.
@@ -56,6 +57,9 @@ CAPABILITY_REVIEW_PROMPT_TEMPLATE = """{system_instruction}
 CAPABILITY TO EVALUATE: {capability}
 SKILL VERSION: {version}
 
+CANONICAL CHECKLIST ITEMS (MANDATORY):
+{canonical_enumeration}
+
 CHECKLIST ITEMS TO EVALUATE:
 {checklist_formatted}{citation_guidance}
 
@@ -107,17 +111,77 @@ Output ONLY the corrected JSON object:
 """
 
 
+def get_canonical_checklist_for_capability(
+    capability: str,
+    version: str,
+    fallback_checklist: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Load canonical checklist from SkillFrontmatter on disk.
+
+    Falls back to provided checklist if skill file is not present.
+    """
+    skill_path = Path("skills") / capability / version / "SKILL.md"
+    if skill_path.is_file():
+        try:
+            from compliance_review.skills.loader import load_skill
+
+            frontmatter, _ = load_skill(skill_path)
+            items = [item.model_dump() for item in frontmatter.checklist]
+            # Order items: model-based first, then deterministic_only=True
+            return sorted(
+                items,
+                key=lambda it: (bool(it.get("deterministic_only", False)), str(it.get("id", ""))),
+            )
+        except Exception:
+            pass
+    if fallback_checklist:
+        return sorted(
+            fallback_checklist,
+            key=lambda it: (bool(it.get("deterministic_only", False)), str(it.get("id", ""))),
+        )
+    return []
+
+
+def format_canonical_enumeration(items: list[dict[str, Any]]) -> str:
+    """Format canonical check IDs enumeration block conforming to D-046."""
+    count_words = {
+        1: "one",
+        2: "two",
+        3: "three",
+        4: "four",
+        5: "five",
+        6: "six",
+        7: "seven",
+        8: "eight",
+        9: "nine",
+        10: "ten",
+    }
+    count_str = count_words.get(len(items), str(len(items)))
+    lines = [
+        f"Your response MUST contain a verdict for EACH of these {count_str} check_ids,",
+        "using these exact strings (do not invent new check_ids):\n",
+    ]
+    for item in items:
+        lines.append(f"- {item['id']}: {item['question']}")
+    lines.append(
+        '\nDo not return any other check_id. If you cannot assess a check, return\n'
+        'it with verdict "not_applicable" and confidence < 0.5.'
+    )
+    return "\n".join(lines)
+
+
 def format_checklist_items(checklist: list[dict[str, Any]]) -> str:
     """Format checklist items for injection into prompt."""
     lines: list[str] = []
     for item in checklist:
         guardrails = item.get("false_positive_guardrails", [])
         gr_str = f" Guardrails: {'; '.join(guardrails)}" if guardrails else ""
+        ev_req = item.get("evidence_requirement", "")
         lines.append(
             f"- Check ID: {item['id']}\n"
-            f"  Question: {item['question']}\n"
-            f"  Required Evidence Form: {item['evidence_requirement']}\n"
-            f"  Severity: {item['severity']}{gr_str}"
+            f"  Question: {item.get('question', '')}\n"
+            f"  Required Evidence Form: {ev_req}\n"
+            f"  Severity: {item.get('severity', 'medium')}{gr_str}"
         )
     return "\n".join(lines)
 
@@ -130,6 +194,8 @@ def build_evaluation_prompt(
     submission_text: str,
 ) -> str:
     """Build the full evaluation prompt for Qwen."""
+    canonical_items = get_canonical_checklist_for_capability(capability, version, checklist)
+    canonical_enum_str = format_canonical_enumeration(canonical_items)
     checklist_str = format_checklist_items(checklist)
     # Truncate submission text if extremely large to respect context
     truncated_text = submission_text[:12000] if len(submission_text) > 12000 else submission_text
@@ -146,6 +212,7 @@ def build_evaluation_prompt(
         schema_description=JSON_SCHEMA_DESCRIPTION,
         capability=capability,
         version=version,
+        canonical_enumeration=canonical_enum_str,
         checklist_formatted=checklist_str,
         citation_guidance=citation_guidance,
         submission_type=submission_type,
