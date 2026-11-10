@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Document version | 1.3.0 |
+| Document version | 1.3.1 |
 | Updated by | Every agent, after every commit |
 | Read by | Every agent, before every task |
 | Conforms to | PRD.md v1.0.0, ARCHITECTURE.md v1.0.1, INSTRUCTIONS.md v1.0.0 |
@@ -700,6 +700,16 @@ This file is the project's persistent memory. It is the first file an agent read
 - Frozen invariant touched: no
 - Resolved by: `agent:p4.7-fix-2`
 - Commits: d68b2e5
+
+### TF-008: nested expander in unsupported section
+- Date: 2026-11-10
+- Test: manual streamlit render of Unsupported Evidence section
+- Error: StreamlitAPIException: Expanders may not be nested
+- Cause: inner st.expander at line 452 of 01_submission.py inside outer Unsupported Evidence expander. Same class as TF-004 but different location; the P4.7-fix-2 unification of resolvers reintroduced an expander wrapper on the new call site.
+- Resolution: replaced inner expander with inline st.code. Added a lint-level AST test tests/unit/test_no_nested_expanders.py to assert no nested expanders exist.
+- Frozen invariant touched: no
+- Resolved by: `agent:p4.7-fix-3`
+- Commits: 367810f, 8e0a38a
 
 ---
 
