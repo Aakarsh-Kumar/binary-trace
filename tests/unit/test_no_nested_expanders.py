@@ -20,7 +20,7 @@ class NestedExpanderVisitor(ast.NodeVisitor):
         self.depth: int = 0
         self.violations: list[int] = []
 
-    def visit_With(self, node: ast.With) -> None:
+    def visit_With(self, node: ast.With) -> None:  # noqa: N802
         has_expander = any(_is_expander_call(item.context_expr) for item in node.items)
         if has_expander:
             if self.depth > 0:
@@ -49,5 +49,5 @@ def test_no_nested_expanders_in_dashboard_pages() -> None:
 
     assert not all_violations, (
         f"Forbidden nested st.expander() blocks detected: {all_violations}. "
-        "Streamlit forbids nested expanders. Render inner content with st.code / st.markdown instead."
+        "Streamlit forbids nested expanders. Render inner content with st.code instead."
     )
