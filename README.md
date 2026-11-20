@@ -8,6 +8,7 @@ Local-first, capability-gated, evidence-verified compliance review system for st
 Per `ARCHITECTURE.md §4.7`, run `migrations/manual/0002_grants.sql` as a MySQL DBA:
 
 ```sql
+
 REVOKE UPDATE, DELETE ON compliance_review.audit_log FROM 'app_user'@'%';
 GRANT INSERT, SELECT ON compliance_review.audit_log TO 'app_user'@'%';
 ```
